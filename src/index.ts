@@ -1,15 +1,22 @@
 import express from 'express';
-import swaggerUi from 'swagger-ui-express';
+import cors from 'cors';
+import helmet from 'helmet';
 import { prisma } from './db/prisma.js';
 import { config } from './config/index.js';
 import { authRouter } from './routes/auth.js';
 import { analysesRouter } from './routes/analyses.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { startWorker } from './workers/poller.js';
-import { swaggerSpec } from './swagger.js';
 
 const app = express();
 
+app.use(helmet());
+app.use(cors({
+  origin: config.NODE_ENV === 'production'
+    ? config.FRONTEND_URL
+    : 'http://localhost:3001',
+  credentials: true,
+}));
 app.use(express.json({ limit: '1mb' }));
 
 // Health check
@@ -22,8 +29,14 @@ app.get('/health', async (_req, res) => {
   }
 });
 
-// Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Swagger UI — development only
+if (config.NODE_ENV !== 'production') {
+  import('swagger-ui-express').then((swaggerUi) =>
+    import('./swagger.js').then(({ swaggerSpec }) => {
+      app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    })
+  );
+}
 
 // Routes
 app.use('/api/auth', authRouter);

@@ -15,6 +15,8 @@ const envSchema = z.object({
   OPENAI_MODEL: z.string().default('gpt-4o-mini'),
   ENABLE_LLM_SKILL_EXTRACTION: z.coerce.boolean().default(false),
 
+  FRONTEND_URL: z.string().url().optional(),
+
   GITHUB_TOKEN: z.string().optional().default(''),
 
   DAILY_ANALYSIS_LIMIT: z.coerce.number().default(5),
