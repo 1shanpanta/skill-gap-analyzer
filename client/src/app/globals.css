@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Markdown content styles (used by roadmap-viewer and suggestions-viewer) */
+@layer components {
+  .markdown-content {
+    @apply text-sm leading-relaxed text-foreground;
+  }
+  .markdown-content h1 {
+    @apply mt-6 mb-3 text-xl font-bold tracking-tight first:mt-0;
+  }
+  .markdown-content h2 {
+    @apply mt-5 mb-2 text-lg font-semibold tracking-tight first:mt-0;
+  }
+  .markdown-content h3 {
+    @apply mt-4 mb-2 text-base font-semibold first:mt-0;
+  }
+  .markdown-content h4 {
+    @apply mt-3 mb-1 text-sm font-semibold first:mt-0;
+  }
+  .markdown-content p {
+    @apply mb-3 last:mb-0;
+  }
+  .markdown-content ul {
+    @apply mb-3 ml-5 list-disc space-y-1 last:mb-0;
+  }
+  .markdown-content ol {
+    @apply mb-3 ml-5 list-decimal space-y-1 last:mb-0;
+  }
+  .markdown-content li {
+    @apply pl-0.5;
+  }
+  .markdown-content li > ul,
+  .markdown-content li > ol {
+    @apply mt-1 mb-0;
+  }
+  .markdown-content a {
+    @apply font-medium text-primary underline underline-offset-4 hover:text-primary/80;
+  }
+  .markdown-content code {
+    @apply rounded bg-muted px-1.5 py-0.5 text-xs font-mono;
+  }
+  .markdown-content pre {
+    @apply mb-3 overflow-x-auto rounded-lg bg-muted p-4 last:mb-0;
+  }
+  .markdown-content pre code {
+    @apply bg-transparent p-0;
+  }
+  .markdown-content blockquote {
+    @apply mb-3 border-l-2 border-muted-foreground/30 pl-4 italic text-muted-foreground last:mb-0;
+  }
+  .markdown-content hr {
+    @apply my-4 border-border;
+  }
+  .markdown-content strong {
+    @apply font-semibold;
+  }
+  .markdown-content table {
+    @apply mb-3 w-full border-collapse text-sm last:mb-0;
+  }
+  .markdown-content th {
+    @apply border border-border bg-muted px-3 py-2 text-left font-semibold;
+  }
+  .markdown-content td {
+    @apply border border-border px-3 py-2;
+  }
+}
