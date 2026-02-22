@@ -2,5 +2,10 @@ node_modules/
 dist/
 .env
 *.js
-!knexfile.ts
 .DS_Store
+client/.next/
+client/node_modules/
+.claude/
+.env 
+
+/src/generated/prisma
