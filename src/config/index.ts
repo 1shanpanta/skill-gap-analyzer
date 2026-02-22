@@ -13,6 +13,7 @@ const envSchema = z.object({
 
   OPENAI_API_KEY: z.string().startsWith('sk-'),
   OPENAI_MODEL: z.string().default('gpt-4o-mini'),
+  ENABLE_LLM_SKILL_EXTRACTION: z.coerce.boolean().default(false),
 
   GITHUB_TOKEN: z.string().optional().default(''),
 
