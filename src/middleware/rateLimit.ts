@@ -1,7 +1,6 @@
 import type { Response, NextFunction } from 'express';
 import type { AuthRequest } from './auth.js';
 import { config } from '../config/index.js';
-import { pool } from '../db/connection.js';
 import { findById, resetDailyCount } from '../db/queries/users.js';
 import { AppError } from './errorHandler.js';
 
@@ -12,7 +11,7 @@ export async function rateLimitMiddleware(req: AuthRequest, _res: Response, next
       return;
     }
 
-    const user = await findById(pool, req.userId);
+    const user = await findById(req.userId);
     if (!user) {
       next(new AppError(401, 'User not found'));
       return;
@@ -25,7 +24,7 @@ export async function rateLimitMiddleware(req: AuthRequest, _res: Response, next
 
     // Reset count if last analysis was before today
     if (lastDate && lastDate < today) {
-      await resetDailyCount(pool, user.id);
+      await resetDailyCount(user.id);
       next();
       return;
     }

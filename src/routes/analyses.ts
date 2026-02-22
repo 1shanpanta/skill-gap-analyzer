@@ -1,18 +1,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { pool } from '../db/connection.js';
+import { prisma } from '../db/prisma.js';
 import { authMiddleware, type AuthRequest } from '../middleware/auth.js';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { createResume } from '../db/queries/resumes.js';
-import { createJobDescription } from '../db/queries/jobDescriptions.js';
-import {
-  createAnalysis,
-  findAnalysisByIdAndUser,
-  listAnalysesByUser,
-} from '../db/queries/analyses.js';
-import { createJob } from '../db/queries/jobs.js';
-import { incrementAnalysisCount } from '../db/queries/users.js';
+import { findAnalysisByIdAndUser, listAnalysesByUser } from '../db/queries/analyses.js';
 
 const router = Router();
 
@@ -33,62 +25,48 @@ router.post('/', authMiddleware, rateLimitMiddleware, async (req: AuthRequest, r
     const body = createAnalysisSchema.parse(req.body);
     const userId = req.userId!;
 
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
-
-      // Insert resume
-      const resumeResult = await client.query(
-        'INSERT INTO resumes (user_id, raw_text) VALUES ($1, $2) RETURNING id',
-        [userId, body.resume_text]
-      );
-      const resumeId = resumeResult.rows[0].id;
-
-      // Insert job description
-      const jdResult = await client.query(
-        'INSERT INTO job_descriptions (user_id, raw_text) VALUES ($1, $2) RETURNING id',
-        [userId, body.job_description_text]
-      );
-      const jdId = jdResult.rows[0].id;
-
-      // Insert analysis
-      const analysisResult = await client.query(
-        `INSERT INTO analyses (user_id, resume_id, job_description_id, github_url)
-         VALUES ($1, $2, $3, $4) RETURNING id, status`,
-        [userId, resumeId, jdId, body.github_url ?? null]
-      );
-      const analysisId = analysisResult.rows[0].id;
-
-      // Insert job
-      await client.query(
-        `INSERT INTO jobs (type, payload)
-         VALUES ($1, $2)`,
-        ['run_analysis', JSON.stringify({ analysis_id: analysisId, user_id: userId })]
-      );
-
-      // Increment daily count
-      await client.query(
-        `UPDATE users
-         SET daily_analysis_count = daily_analysis_count + 1,
-             last_analysis_date = CURRENT_DATE,
-             updated_at = NOW()
-         WHERE id = $1`,
-        [userId]
-      );
-
-      await client.query('COMMIT');
-
-      res.status(201).json({
-        analysis_id: analysisId,
-        status: 'pending',
-        message: 'Analysis queued. Poll GET /api/analyses/:id/status for progress.',
+    const result = await prisma.$transaction(async (tx) => {
+      const resume = await tx.resume.create({
+        data: { user_id: userId, raw_text: body.resume_text },
       });
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
-    }
+
+      const jd = await tx.jobDescription.create({
+        data: { user_id: userId, raw_text: body.job_description_text },
+      });
+
+      const analysis = await tx.analysis.create({
+        data: {
+          user_id: userId,
+          resume_id: resume.id,
+          job_description_id: jd.id,
+          github_url: body.github_url ?? null,
+        },
+      });
+
+      await tx.job.create({
+        data: {
+          type: 'run_analysis',
+          payload: { analysis_id: analysis.id, user_id: userId },
+        },
+      });
+
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          daily_analysis_count: { increment: 1 },
+          last_analysis_date: new Date(),
+          updated_at: new Date(),
+        },
+      });
+
+      return analysis;
+    });
+
+    res.status(201).json({
+      analysis_id: result.id,
+      status: 'pending',
+      message: 'Analysis queued. Poll GET /api/analyses/:id/status for progress.',
+    });
   } catch (err) {
     if (err instanceof z.ZodError) {
       res.status(400).json({
@@ -105,7 +83,7 @@ router.post('/', authMiddleware, rateLimitMiddleware, async (req: AuthRequest, r
 // GET /api/analyses/:id
 router.get('/:id', authMiddleware, async (req: AuthRequest, res, next) => {
   try {
-    const analysis = await findAnalysisByIdAndUser(pool, req.params.id as string, req.userId!);
+    const analysis = await findAnalysisByIdAndUser(req.params.id as string, req.userId!);
     if (!analysis) {
       throw new AppError(404, 'Analysis not found');
     }
@@ -118,7 +96,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res, next) => {
 // GET /api/analyses/:id/status
 router.get('/:id/status', authMiddleware, async (req: AuthRequest, res, next) => {
   try {
-    const analysis = await findAnalysisByIdAndUser(pool, req.params.id as string, req.userId!);
+    const analysis = await findAnalysisByIdAndUser(req.params.id as string, req.userId!);
     if (!analysis) {
       throw new AppError(404, 'Analysis not found');
     }
@@ -139,7 +117,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res, next) => {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
 
-    const { analyses, total } = await listAnalysesByUser(pool, req.userId!, page, limit);
+    const { analyses, total } = await listAnalysesByUser(req.userId!, page, limit);
 
     res.json({
       analyses: analyses.map((a) => ({

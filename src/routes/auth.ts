@@ -3,7 +3,6 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/index.js';
-import { pool } from '../db/connection.js';
 import { createUser, findByEmail } from '../db/queries/users.js';
 import { AppError } from '../middleware/errorHandler.js';
 
@@ -35,13 +34,13 @@ router.post('/register', async (req, res, next) => {
   try {
     const body = registerSchema.parse(req.body);
 
-    const existing = await findByEmail(pool, body.email);
+    const existing = await findByEmail(body.email);
     if (existing) {
       throw new AppError(409, 'Email already registered');
     }
 
     const passwordHash = await bcrypt.hash(body.password, config.BCRYPT_SALT_ROUNDS);
-    const user = await createUser(pool, body.email, body.name, passwordHash);
+    const user = await createUser(body.email, body.name, passwordHash);
     const token = generateToken(user.id);
 
     res.status(201).json({
@@ -71,7 +70,7 @@ router.post('/login', async (req, res, next) => {
   try {
     const body = loginSchema.parse(req.body);
 
-    const user = await findByEmail(pool, body.email);
+    const user = await findByEmail(body.email);
     if (!user) {
       throw new AppError(401, 'Invalid email or password');
     }

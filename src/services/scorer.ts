@@ -4,7 +4,7 @@ import type { ExtractedResumeData, ExtractedJDData } from './skillExtractor.js';
 
 // ── Types ──
 
-export interface SkillMatchDetails {
+interface SkillMatchDetails {
   matchedSkills: string[];
   missingRequired: string[];
   missingPreferred: string[];
@@ -12,7 +12,7 @@ export interface SkillMatchDetails {
   extraSkills: string[];
 }
 
-export interface ScoreBreakdown {
+interface ScoreBreakdown {
   skill_match: number;
   seniority_alignment: number;
   github_signal: number;
@@ -21,7 +21,7 @@ export interface ScoreBreakdown {
   weighted_total: number;
 }
 
-export interface ScoringResult {
+interface ScoringResult {
   overallScore: number;
   scoreBreakdown: ScoreBreakdown;
   skillGaps: SkillMatchDetails;

@@ -1,4 +1,3 @@
-import { Pool } from 'pg';
 import {
   getAnalysisWithRelations,
   updateAnalysisStatus,
@@ -9,33 +8,49 @@ import { updateJDExtractedData } from '../db/queries/jobDescriptions.js';
 import { extractSkillsFromResume, extractSkillsFromJD } from './skillExtractor.js';
 import { calculateOverallScore, type GitHubSignals } from './scorer.js';
 import { simulateEmailNotification } from './emailSimulator.js';
+import { config } from '../config/index.js';
 
 export async function runAnalysisPipeline(
-  analysisId: string,
-  pool: Pool
+  analysisId: string
 ): Promise<{ success: true }> {
-  const analysis = await getAnalysisWithRelations(pool, analysisId);
+  const analysis = await getAnalysisWithRelations(analysisId);
   if (!analysis) throw new Error(`Analysis ${analysisId} not found`);
 
-  await updateAnalysisStatus(pool, analysisId, 'processing');
+  await updateAnalysisStatus(analysisId, 'processing');
 
   try {
     // 1. Extract skills from resume
-    const resumeData = extractSkillsFromResume(analysis.resume_raw_text);
-    await updateResumeExtractedData(pool, analysis.resume_id, resumeData);
+    let resumeData = extractSkillsFromResume(analysis.resume_raw_text);
+    await updateResumeExtractedData(analysis.resume_id, resumeData);
 
     // 2. Extract skills from JD
-    const jdData = extractSkillsFromJD(analysis.jd_raw_text);
-    await updateJDExtractedData(pool, analysis.job_description_id, jdData);
+    let jdData = extractSkillsFromJD(analysis.jd_raw_text);
+    await updateJDExtractedData(analysis.job_description_id, jdData);
 
-    // 3. GitHub signals (placeholder — real implementation in Phase 7)
+    // 2.5. LLM-enhanced skill extraction (if enabled)
+    if (config.ENABLE_LLM_SKILL_EXTRACTION) {
+      try {
+        const { enhanceWithLLM } = await import('./llmSkillExtractor.js');
+        const enhanced = await enhanceWithLLM(
+          analysis.resume_raw_text,
+          analysis.jd_raw_text,
+          resumeData,
+          jdData
+        );
+        resumeData = enhanced.resumeData;
+        jdData = enhanced.jdData;
+      } catch {
+        console.warn('LLM skill extraction failed, continuing with deterministic only');
+      }
+    }
+
+    // 3. GitHub signals
     let githubSignals: GitHubSignals | null = null;
     if (analysis.github_url) {
       try {
         const { fetchGitHubSignals } = await import('./githubAnalyzer.js');
         githubSignals = await fetchGitHubSignals(analysis.github_url);
       } catch {
-        // GitHub analysis is optional — continue without it
         console.warn(`GitHub analysis failed for ${analysis.github_url}, continuing without it`);
       }
     }
@@ -47,7 +62,7 @@ export async function runAnalysisPipeline(
       githubSignals
     );
 
-    // 5. LLM: Roadmap (placeholder — real implementation in Phase 8)
+    // 5. LLM: Roadmap & resume suggestions
     let roadmap = 'Roadmap generation pending — LLM integration not yet configured.';
     let resumeSuggestions = 'Resume suggestions pending — LLM integration not yet configured.';
     let tokenUsage: Record<string, any> = { total_tokens: 0, estimated_cost_usd: 0 };
@@ -81,12 +96,11 @@ export async function runAnalysisPipeline(
         estimated_cost_usd: roadmapResult.tokenUsage.estimated_cost_usd + suggestionsResult.tokenUsage.estimated_cost_usd,
       };
     } catch {
-      // LLM calls are optional for now — continue with placeholders
       console.warn('LLM integration not available, using placeholder text');
     }
 
     // 6. Save results
-    await completeAnalysis(pool, analysisId, {
+    await completeAnalysis(analysisId, {
       overall_score: overallScore,
       score_breakdown: scoreBreakdown,
       skill_gaps: skillGaps,
@@ -101,7 +115,7 @@ export async function runAnalysisPipeline(
 
     return { success: true };
   } catch (err) {
-    await updateAnalysisStatus(pool, analysisId, 'failed');
+    await updateAnalysisStatus(analysisId, 'failed');
     throw err;
   }
 }
