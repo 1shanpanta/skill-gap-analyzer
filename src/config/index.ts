@@ -11,8 +11,8 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('7d'),
   BCRYPT_SALT_ROUNDS: z.coerce.number().default(12),
 
-  OPENAI_API_KEY: z.string().startsWith('sk-'),
-  OPENAI_MODEL: z.string().default('gpt-4o-mini'),
+  GEMINI_API_KEY: z.string().min(1),
+  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
   ENABLE_LLM_SKILL_EXTRACTION: z.coerce.boolean().default(false),
 
   FRONTEND_URL: z.string().url().optional(),

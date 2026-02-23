@@ -1,9 +1,10 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config/index.js';
 import { buildResumeSuggestionsPrompt, type ResumeSuggestionsPromptData } from '../prompts/resumeRewrite.js';
 import { trackTokens, type TokenUsage } from '../utils/tokenTracker.js';
 
-const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
+const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: config.GEMINI_MODEL });
 
 export async function generateResumeSuggestions(data: ResumeSuggestionsPromptData): Promise<{
   suggestions: string;
@@ -11,15 +12,17 @@ export async function generateResumeSuggestions(data: ResumeSuggestionsPromptDat
 }> {
   const prompt = buildResumeSuggestionsPrompt(data);
 
-  const response = await openai.chat.completions.create({
-    model: config.OPENAI_MODEL,
-    messages: [{ role: 'user', content: prompt }],
-    max_tokens: 1500,
-    temperature: 0.7,
+  const response = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { maxOutputTokens: 1500, temperature: 0.7 },
   });
 
-  const suggestions = response.choices[0]?.message?.content ?? '';
-  const tokenUsage = trackTokens('resume_suggestions', response.usage, config.OPENAI_MODEL);
+  const suggestions = response.response.text() ?? '';
+  const usage = response.response.usageMetadata;
+  const tokenUsage = trackTokens('resume_suggestions', {
+    prompt_tokens: usage?.promptTokenCount ?? 0,
+    completion_tokens: usage?.candidatesTokenCount ?? 0,
+  }, config.GEMINI_MODEL);
 
   return { suggestions, tokenUsage };
 }
