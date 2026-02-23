@@ -1,11 +1,11 @@
 node_modules/
 dist/
-.env
+.env*
+!.env.example
 *.js
 .DS_Store
 client/.next/
 client/node_modules/
 .claude/
-.env 
 
 /src/generated/prisma
