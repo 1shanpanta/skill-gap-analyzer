@@ -1,8 +1,8 @@
 import type { Response, NextFunction } from 'express';
-import type { AuthRequest } from './auth.js';
-import { config } from '../config/index.js';
-import { findById, resetDailyCount } from '../db/queries/users.js';
-import { AppError } from './errorHandler.js';
+import type { AuthRequest } from './auth';
+import { config } from '../config/index';
+import { findById, resetDailyCount } from '../db/queries/users';
+import { AppError } from './errorHandler';
 
 export async function rateLimitMiddleware(req: AuthRequest, _res: Response, next: NextFunction): Promise<void> {
   try {

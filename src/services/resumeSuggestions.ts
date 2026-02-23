@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { config } from '../config/index.js';
-import { buildResumeSuggestionsPrompt, type ResumeSuggestionsPromptData } from '../prompts/resumeRewrite.js';
-import { trackTokens, type TokenUsage } from '../utils/tokenTracker.js';
+import { config } from '../config/index';
+import { buildResumeSuggestionsPrompt, type ResumeSuggestionsPromptData } from '../prompts/resumeRewrite';
+import { trackTokens, type TokenUsage } from '../utils/tokenTracker';
 
 const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: config.GEMINI_MODEL });

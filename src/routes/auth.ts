@@ -2,9 +2,9 @@ import { Router } from 'express';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { config } from '../config/index.js';
-import { createUser, findByEmail } from '../db/queries/users.js';
-import { AppError } from '../middleware/errorHandler.js';
+import { config } from '../config/index';
+import { createUser, findByEmail } from '../db/queries/users';
+import { AppError } from '../middleware/errorHandler';
 
 const router = Router();
 

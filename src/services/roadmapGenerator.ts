@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { config } from '../config/index.js';
-import { buildRoadmapPrompt, type RoadmapPromptData } from '../prompts/roadmap.js';
-import { trackTokens, type TokenUsage } from '../utils/tokenTracker.js';
+import { config } from '../config/index';
+import { buildRoadmapPrompt, type RoadmapPromptData } from '../prompts/roadmap';
+import { trackTokens, type TokenUsage } from '../utils/tokenTracker';
 
 const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: config.GEMINI_MODEL });

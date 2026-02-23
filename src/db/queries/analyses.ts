@@ -1,5 +1,5 @@
-import { prisma } from '../prisma.js';
-import { Prisma } from '../../generated/prisma/client.js';
+import { prisma } from '../prisma';
+import { Prisma } from '../../generated/prisma/client';
 
 export interface AnalysisWithRelations {
   id: string;

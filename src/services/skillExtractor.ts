@@ -1,7 +1,7 @@
-import { normalizeText } from '../utils/textNormalizer.js';
-import { extractYearsOfExperience } from '../utils/experienceParser.js';
-import { detectSeniority, type SeniorityLevel } from '../utils/seniorityDetector.js';
-import { SKILL_TAXONOMY, type SkillCategory, type TaxonomyEntry } from '../taxonomy/skills.js';
+import { normalizeText } from '../utils/textNormalizer';
+import { extractYearsOfExperience } from '../utils/experienceParser';
+import { detectSeniority, type SeniorityLevel } from '../utils/seniorityDetector';
+import { SKILL_TAXONOMY, type SkillCategory, type TaxonomyEntry } from '../taxonomy/skills';
 
 // ── Types ──
 

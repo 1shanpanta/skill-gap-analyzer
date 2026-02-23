@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { prisma } from '../db/prisma.js';
-import { authMiddleware, type AuthRequest } from '../middleware/auth.js';
-import { rateLimitMiddleware } from '../middleware/rateLimit.js';
-import { AppError } from '../middleware/errorHandler.js';
-import { findAnalysisByIdAndUser, listAnalysesByUser } from '../db/queries/analyses.js';
+import { prisma } from '../db/prisma';
+import { authMiddleware, type AuthRequest } from '../middleware/auth';
+import { rateLimitMiddleware } from '../middleware/rateLimit';
+import { AppError } from '../middleware/errorHandler';
+import { findAnalysisByIdAndUser, listAnalysesByUser } from '../db/queries/analyses';
 
 const router = Router();
 

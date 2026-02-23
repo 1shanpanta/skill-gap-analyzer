@@ -1,5 +1,5 @@
-import { config } from '../config/index.js';
-import type { GitHubSignals } from './scorer.js';
+import { config } from '../config/index';
+import type { GitHubSignals } from './scorer';
 
 function extractUsername(url: string): string {
   const match = url.match(/github\.com\/([a-zA-Z0-9\-]+)/);

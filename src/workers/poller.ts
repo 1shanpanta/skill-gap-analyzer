@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
-import { config } from '../config/index.js';
-import { claimJob, completeJob, failJob, recoverStaleJobs } from '../db/queries/jobs.js';
-import { handleJob } from './handlers.js';
+import { config } from '../config/index';
+import { claimJob, completeJob, failJob, recoverStaleJobs } from '../db/queries/jobs';
+import { handleJob } from './handlers';
 
 const WORKER_ID = `worker-${randomUUID().slice(0, 8)}`;
 

@@ -1,5 +1,5 @@
-import { prisma } from '../prisma.js';
-import type { Job } from '../../generated/prisma/client.js';
+import { prisma } from '../prisma';
+import type { Job } from '../../generated/prisma/client';
 
 export type { Job };
 

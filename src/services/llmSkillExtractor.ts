@@ -1,9 +1,9 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { config } from '../config/index.js';
-import { buildSkillExtractionPrompt } from '../prompts/skillExtraction.js';
-import { getAllCanonicalNames, canonicalize } from '../taxonomy/skills.js';
-import { trackTokens, type TokenUsage } from '../utils/tokenTracker.js';
-import type { ExtractedResumeData, ExtractedJDData } from './skillExtractor.js';
+import { config } from '../config/index';
+import { buildSkillExtractionPrompt } from '../prompts/skillExtraction';
+import { getAllCanonicalNames, canonicalize } from '../taxonomy/skills';
+import { trackTokens, type TokenUsage } from '../utils/tokenTracker';
+import type { ExtractedResumeData, ExtractedJDData } from './skillExtractor';
 
 const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: config.GEMINI_MODEL });

@@ -2,13 +2,13 @@ import {
   getAnalysisWithRelations,
   updateAnalysisStatus,
   completeAnalysis,
-} from '../db/queries/analyses.js';
-import { updateResumeExtractedData } from '../db/queries/resumes.js';
-import { updateJDExtractedData } from '../db/queries/jobDescriptions.js';
-import { extractSkillsFromResume, extractSkillsFromJD } from './skillExtractor.js';
-import { calculateOverallScore, type GitHubSignals } from './scorer.js';
-import { simulateEmailNotification } from './emailSimulator.js';
-import { config } from '../config/index.js';
+} from '../db/queries/analyses';
+import { updateResumeExtractedData } from '../db/queries/resumes';
+import { updateJDExtractedData } from '../db/queries/jobDescriptions';
+import { extractSkillsFromResume, extractSkillsFromJD } from './skillExtractor';
+import { calculateOverallScore, type GitHubSignals } from './scorer';
+import { simulateEmailNotification } from './emailSimulator';
+import { config } from '../config/index';
 
 export async function runAnalysisPipeline(
   analysisId: string
@@ -30,7 +30,7 @@ export async function runAnalysisPipeline(
     // 2.5. LLM-enhanced skill extraction (if enabled)
     if (config.ENABLE_LLM_SKILL_EXTRACTION) {
       try {
-        const { enhanceWithLLM } = await import('./llmSkillExtractor.js');
+        const { enhanceWithLLM } = await import('./llmSkillExtractor');
         const enhanced = await enhanceWithLLM(
           analysis.resume_raw_text,
           analysis.jd_raw_text,
@@ -48,7 +48,7 @@ export async function runAnalysisPipeline(
     let githubSignals: GitHubSignals | null = null;
     if (analysis.github_url) {
       try {
-        const { fetchGitHubSignals } = await import('./githubAnalyzer.js');
+        const { fetchGitHubSignals } = await import('./githubAnalyzer');
         githubSignals = await fetchGitHubSignals(analysis.github_url);
       } catch {
         console.warn(`GitHub analysis failed for ${analysis.github_url}, continuing without it`);
@@ -68,7 +68,7 @@ export async function runAnalysisPipeline(
     let tokenUsage: Record<string, any> = { total_tokens: 0, estimated_cost_usd: 0 };
 
     try {
-      const { generateRoadmap } = await import('./roadmapGenerator.js');
+      const { generateRoadmap } = await import('./roadmapGenerator');
       const roadmapResult = await generateRoadmap({
         missingRequired: skillGaps.missingRequired,
         missingPreferred: skillGaps.missingPreferred,
@@ -79,7 +79,7 @@ export async function runAnalysisPipeline(
       });
       roadmap = roadmapResult.roadmap;
 
-      const { generateResumeSuggestions } = await import('./resumeSuggestions.js');
+      const { generateResumeSuggestions } = await import('./resumeSuggestions');
       const suggestionsResult = await generateResumeSuggestions({
         resumeText: analysis.resume_raw_text,
         jobDescriptionText: analysis.jd_raw_text,

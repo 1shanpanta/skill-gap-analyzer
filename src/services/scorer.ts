@@ -1,6 +1,6 @@
-import { canonicalize, hasExactMatch, hasPartialMatch } from '../taxonomy/skills.js';
-import { SENIORITY_LEVEL_MAP, type SeniorityLevel } from '../utils/seniorityDetector.js';
-import type { ExtractedResumeData, ExtractedJDData } from './skillExtractor.js';
+import { canonicalize, hasExactMatch, hasPartialMatch } from '../taxonomy/skills';
+import { SENIORITY_LEVEL_MAP, type SeniorityLevel } from '../utils/seniorityDetector';
+import type { ExtractedResumeData, ExtractedJDData } from './skillExtractor';
 
 // ── Types ──
 
