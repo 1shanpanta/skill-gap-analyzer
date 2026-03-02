@@ -1,10 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 import { config } from '../config/index';
 import { buildRoadmapPrompt, type RoadmapPromptData } from '../prompts/roadmap';
 import { trackTokens, type TokenUsage } from '../utils/tokenTracker';
 
-const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: config.GEMINI_MODEL });
+const groq = new Groq({ apiKey: config.GROQ_API_KEY });
 
 export async function generateRoadmap(data: RoadmapPromptData): Promise<{
   roadmap: string;
@@ -12,17 +11,18 @@ export async function generateRoadmap(data: RoadmapPromptData): Promise<{
 }> {
   const prompt = buildRoadmapPrompt(data);
 
-  const response = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: { maxOutputTokens: 2000, temperature: 0.7 },
+  const response = await groq.chat.completions.create({
+    model: config.GROQ_MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: 2000,
+    temperature: 0.7,
   });
 
-  const roadmap = response.response.text() ?? '';
-  const usage = response.response.usageMetadata;
+  const roadmap = response.choices[0]?.message?.content ?? '';
   const tokenUsage = trackTokens('roadmap', {
-    prompt_tokens: usage?.promptTokenCount ?? 0,
-    completion_tokens: usage?.candidatesTokenCount ?? 0,
-  }, config.GEMINI_MODEL);
+    prompt_tokens: response.usage?.prompt_tokens ?? 0,
+    completion_tokens: response.usage?.completion_tokens ?? 0,
+  }, config.GROQ_MODEL);
 
   return { roadmap, tokenUsage };
 }

@@ -7,11 +7,10 @@ export interface TokenUsage {
   estimated_cost_usd: number;
 }
 
-// Gemini pricing (per token) — free tier has no cost
 const PRICING: Record<string, { input: number; output: number }> = {
-  'gemini-2.5-flash': { input: 0, output: 0 },
-  'gemini-1.5-flash': { input: 0, output: 0 },
-  'gemini-1.5-pro': { input: 1.25 / 1_000_000, output: 5.00 / 1_000_000 },
+  'llama-3.3-70b-versatile': { input: 0.59 / 1_000_000, output: 0.79 / 1_000_000 },
+  'llama-3.1-8b-instant': { input: 0.05 / 1_000_000, output: 0.08 / 1_000_000 },
+  'mixtral-8x7b-32768': { input: 0.24 / 1_000_000, output: 0.24 / 1_000_000 },
 };
 
 export function trackTokens(
@@ -21,7 +20,7 @@ export function trackTokens(
 ): TokenUsage {
   const promptTokens = usage?.prompt_tokens ?? 0;
   const completionTokens = usage?.completion_tokens ?? 0;
-  const pricing = PRICING[model] ?? PRICING['gemini-2.5-flash'];
+  const pricing = PRICING[model] ?? PRICING['llama-3.3-70b-versatile'];
 
   return {
     step,
