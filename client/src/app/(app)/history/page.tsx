@@ -64,7 +64,7 @@ export default function HistoryPage() {
             Analysis History
           </h1>
           <p className="text-muted-foreground mt-2">
-            View all your past analyses.
+            All your past runs in one place.
           </p>
         </div>
         <Button asChild>
@@ -102,14 +102,14 @@ export default function HistoryPage() {
           <div className="rounded-full bg-muted p-3">
             <FileSearch className="h-6 w-6 text-muted-foreground" />
           </div>
-          <h3 className="mt-4 text-lg font-semibold">No analyses yet</h3>
+          <h3 className="mt-4 text-lg font-semibold">Nothing here yet</h3>
           <p className="mt-1 text-sm text-muted-foreground max-w-sm">
-            No analyses yet. Create your first analysis from the Dashboard.
+            Once you run your first analysis, it&apos;ll show up here.
           </p>
           <Button asChild className="mt-4">
             <Link href="/dashboard">
               <Plus className="mr-2 h-4 w-4" />
-              Create First Analysis
+              Run your first one
             </Link>
           </Button>
         </div>

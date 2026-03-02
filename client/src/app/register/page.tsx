@@ -18,9 +18,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 
 export default function RegisterPage() {
-  const { register, user, isLoading: authLoading } = useAuth();
+  const { register, login, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -29,12 +30,15 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirect if already authenticated
+  // Auto-login with dev bypass for now (skip auth)
   useEffect(() => {
+    if (!authLoading && !user) {
+      login("", "");
+    }
     if (!authLoading && user) {
       router.replace("/dashboard");
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user, router, login]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -71,12 +75,25 @@ export default function RegisterPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>
-            Get started with Skill Gap Analyzer
+            It only takes a minute
           </CardDescription>
         </CardHeader>
 
+        <CardContent className="space-y-4">
+          <GoogleSignInButton label="Sign up with Google" />
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">or</span>
+            </div>
+          </div>
+        </CardContent>
+
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-0">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input
@@ -117,6 +134,9 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isSubmitting}
               />
+              <p className="text-xs text-muted-foreground">
+                8+ characters, must include a letter and a number
+              </p>
             </div>
 
             {error && (

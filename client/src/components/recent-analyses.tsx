@@ -110,7 +110,7 @@ export function RecentAnalyses() {
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <FileSearch className="h-8 w-8 text-muted-foreground" />
             <p className="mt-2 text-sm text-muted-foreground">
-              No analyses yet. Create your first one above.
+              Nothing yet. Run one above to get started.
             </p>
           </div>
         ) : (
