@@ -11,13 +11,22 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('7d'),
   BCRYPT_SALT_ROUNDS: z.coerce.number().default(12),
 
-  GEMINI_API_KEY: z.string().min(1),
-  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
+  GROQ_API_KEY: z.string().min(1),
+  GROQ_MODEL: z.string().default('llama-3.3-70b-versatile'),
   ENABLE_LLM_SKILL_EXTRACTION: z.coerce.boolean().default(false),
 
   FRONTEND_URL: z.string().url().optional(),
 
   GITHUB_TOKEN: z.string().optional().default(''),
+
+  // Google OAuth
+  GOOGLE_CLIENT_ID: z.string().optional().default(''),
+  GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
+  GOOGLE_CALLBACK_URL: z.string().optional().default('http://localhost:3001/api/auth/google/callback'),
+
+  // Email (Resend)
+  RESEND_API_KEY: z.string().optional().default(''),
+  RESEND_FROM_EMAIL: z.string().optional().default('noreply@skillgap.dev'),
 
   DAILY_ANALYSIS_LIMIT: z.coerce.number().default(5),
 

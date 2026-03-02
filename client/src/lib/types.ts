@@ -2,7 +2,15 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  avatar_url: string | null;
   created_at: string;
+}
+
+export interface UserProfile extends User {
+  has_password: boolean;
+  has_google: boolean;
+  daily_analysis_count: number;
+  total_analyses: number;
 }
 
 export interface AuthResponse {
