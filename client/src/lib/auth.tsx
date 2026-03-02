@@ -17,6 +17,7 @@ interface AuthContextValue {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, name: string, password: string) => Promise<void>;
+  loginWithToken: (token: string, user: User) => void;
   logout: () => void;
 }
 
@@ -55,20 +56,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      // DEV BYPASS: empty fields → fake user, skip API
-      if (!email && !password) {
-        persistAuth({
-          user: { id: "dev-user", email: "dev@localhost", name: "Dev User", created_at: new Date().toISOString() },
-          token: "dev-bypass-token",
-        });
-        router.push("/dashboard");
-        return;
-      }
+      // Dev bypass: empty fields → hit dev-login endpoint for a real JWT
+      const endpoint = !email && !password ? "/api/auth/dev-login" : "/api/auth/login";
+      const body = !email && !password ? {} : { email, password };
 
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -103,6 +98,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [persistAuth, router]
   );
 
+  const loginWithToken = useCallback(
+    (newToken: string, newUser: User) => {
+      persistAuth({ token: newToken, user: newUser });
+      router.push("/dashboard");
+    },
+    [persistAuth, router]
+  );
+
   const logout = useCallback(() => {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("auth_user");
@@ -112,8 +115,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, token, isLoading, login, register, logout }),
-    [user, token, isLoading, login, register, logout]
+    () => ({ user, token, isLoading, login, register, loginWithToken, logout }),
+    [user, token, isLoading, login, register, loginWithToken, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

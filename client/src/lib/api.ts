@@ -12,14 +12,6 @@ export async function apiFetch(
   const token =
     typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
 
-  // DEV BYPASS: skip real API calls when using the dev token
-  if (token === "dev-bypass-token") {
-    return new Response(JSON.stringify({ analyses: [], total: 0, page: 1, limit: 10 }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
   const headers = new Headers(init?.headers);
 
   if (token) {

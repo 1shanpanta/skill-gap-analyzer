@@ -8,6 +8,7 @@ import {
   BarChart3,
   LayoutDashboard,
   History,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/history", label: "History", icon: History },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Navbar() {
@@ -75,9 +77,26 @@ export function Navbar() {
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
-          <span className="hidden text-sm text-muted-foreground sm:inline-block">
-            {user?.name || user?.email}
-          </span>
+          <Link
+            href="/settings"
+            className="hidden items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-accent sm:flex"
+          >
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt=""
+                className="h-6 w-6 rounded-full"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                {(user?.name || user?.email || "?").charAt(0).toUpperCase()}
+              </div>
+            )}
+            <span className="text-sm text-muted-foreground">
+              {user?.name || user?.email}
+            </span>
+          </Link>
           <Button
             variant="ghost"
             size="sm"
@@ -131,9 +150,27 @@ export function Navbar() {
             })}
             <div className="my-1 border-t" />
             <div className="flex items-center justify-between px-3 py-2">
-              <span className="text-sm text-muted-foreground">
-                {user?.name || user?.email}
-              </span>
+              <Link
+                href="/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-accent"
+              >
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt=""
+                    className="h-6 w-6 rounded-full"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                    {(user?.name || user?.email || "?").charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {user?.name || user?.email}
+                </span>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"
