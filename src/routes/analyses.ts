@@ -7,6 +7,7 @@ import { authMiddleware, type AuthRequest } from '../middleware/auth';
 import { rateLimitMiddleware } from '../middleware/rateLimit';
 import { AppError } from '../middleware/errorHandler';
 import { findAnalysisByIdAndUser, listAnalysesByUser, deleteAnalysis } from '../db/queries/analyses';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -186,6 +187,63 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res, next) => {
         : null,
       status_counts: statusCounts,
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/analyses/export — CSV export of analysis history
+router.get('/export', authMiddleware, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.userId!;
+    const format = req.query.format as string;
+
+    if (format !== 'csv') {
+      throw new AppError(400, 'Only CSV format is supported', 'INVALID_FORMAT');
+    }
+
+    const analyses = await prisma.analysis.findMany({
+      where: { user_id: userId },
+      orderBy: { created_at: 'desc' },
+      select: {
+        created_at: true,
+        status: true,
+        overall_score: true,
+        skill_gaps: true,
+        github_url: true,
+      },
+    });
+
+    const header = 'Date,Status,Score,Matched Skills,Missing Skills,GitHub URL';
+    const rows = analyses.map((a) => {
+      const date = new Date(a.created_at).toISOString().split('T')[0];
+      const score = a.overall_score != null ? String(a.overall_score) : '';
+      const gaps = a.skill_gaps as { matchedSkills?: string[]; missingRequired?: string[]; missingPreferred?: string[] } | null;
+      const matched = gaps?.matchedSkills?.join('; ') ?? '';
+      const missing = [
+        ...(gaps?.missingRequired ?? []),
+        ...(gaps?.missingPreferred ?? []),
+      ].join('; ');
+      const github = a.github_url ?? '';
+
+      // Escape fields that might contain commas/quotes
+      const escape = (s: string) => {
+        if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+          return `"${s.replace(/"/g, '""')}"`;
+        }
+        return s;
+      };
+
+      return [date, a.status, score, escape(matched), escape(missing), github].join(',');
+    });
+
+    const csv = [header, ...rows].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="analyses.csv"');
+    res.send(csv);
+
+    logger.info({ userId, count: analyses.length }, 'CSV export generated');
   } catch (err) {
     next(err);
   }
