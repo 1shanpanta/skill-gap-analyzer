@@ -12,9 +12,16 @@ The app scores your fit, identifies skill gaps, and generates a personalized lea
 - **Resume suggestions** — keyword additions, bullet rewrites, and skills section reordering
 - **GitHub analysis** — repo count, languages, activity, and contribution signals
 - **Resume upload** — parse PDF, DOCX, or TXT files client-side (or paste text directly)
+- **Saved resumes** — persist resumes for reuse across analyses
 - **Background processing** — analyses run async via a Postgres-based job queue
 - **Google OAuth** — sign in with Google or email/password
-- **Analysis history** — browse and revisit all past analyses
+- **Analysis history** — browse and revisit all past analyses with filtering and sorting
+- **Analysis sharing** — generate unique share links for public viewing
+- **Analysis comparison** — side-by-side comparison of two analyses
+- **PDF export** — download analysis as a PDF report
+- **Analysis notes** — add notes and comments to analyses
+- **Pay-as-you-go credits** — 1 free analysis, then buy credit packs via DodoPayments
+- **Analytics** — PostHog integration with reverse proxy for event tracking
 
 ## Tech Stack
 
@@ -24,7 +31,9 @@ The app scores your fit, identifies skill gaps, and generates a personalized lea
 | Frontend | Next.js 16 (App Router) + Tailwind CSS + shadcn/ui |
 | Database | PostgreSQL + Prisma ORM v7 |
 | LLM | Groq (llama-3.3-70b-versatile) |
+| Payments | DodoPayments |
 | Auth | JWT + bcrypt + Google OAuth |
+| Analytics | PostHog |
 | Package Manager | bun |
 
 ## Getting Started
@@ -67,7 +76,18 @@ JWT_SECRET=any-string-at-least-32-characters-long
 GROQ_API_KEY=your-groq-api-key
 ```
 
-Everything else is optional. See `.env.example` for the full list (Google OAuth, Resend email, GitHub token, rate limits, worker config).
+Optional integrations:
+
+| Variable | Purpose |
+|----------|---------|
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth login |
+| `RESEND_API_KEY` | Transactional emails via Resend |
+| `GITHUB_TOKEN` | Higher GitHub API rate limits |
+| `DODO_API_KEY` / `DODO_WEBHOOK_SECRET` | DodoPayments for credit purchases |
+| `DODO_PRODUCT_10` / `DODO_PRODUCT_30` / `DODO_PRODUCT_100` | DodoPayments product IDs for credit packs |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog analytics (set in `client/.env.local`) |
+
+See `.env.example` for the full list.
 
 ## How It Works
 
@@ -82,20 +102,33 @@ Everything else is optional. See `.env.example` for the full list (Google OAuth,
    - Generate resume improvement suggestions via Groq LLM
 4. Frontend polls for status and displays results when ready
 
+## Pricing
+
+Every account gets 1 free analysis. After that, users buy credit packs:
+
+| Pack | Credits | Price |
+|------|---------|-------|
+| Starter | 5 | $5 |
+| Standard | 15 | $10 |
+| Pro | 50 | $25 |
+
+Payments are handled via DodoPayments with webhook-based credit fulfillment.
+
 ## Project Structure
 
 ```
 ├── src/                    # Express backend
-│   ├── routes/             # API endpoints (auth, analyses)
-│   ├── services/           # Core logic (scoring, skill extraction, LLM)
+│   ├── routes/             # API endpoints (auth, analyses, billing, webhooks)
+│   ├── services/           # Core logic (scoring, skill extraction, LLM, dodo)
 │   ├── middleware/          # Auth, rate limiting, error handling
+│   ├── db/                 # Prisma queries (users, credits, analyses)
 │   ├── utils/              # Taxonomy, text normalization, token tracking
 │   └── worker/             # Background job poller and handlers
 ├── client/                 # Next.js frontend
 │   └── src/
 │       ├── app/            # Pages (App Router)
 │       ├── components/     # UI components (analysis form, charts, viewers)
-│       └── lib/            # Auth context, API wrapper, types
+│       └── lib/            # Auth context, API wrapper, types, PostHog
 ├── prisma/                 # Database schema and migrations
 └── tests/                  # Backend tests
 ```
@@ -108,10 +141,21 @@ Everything else is optional. See `.env.example` for the full list (Google OAuth,
 | POST | `/api/auth/login` | Login |
 | GET | `/api/auth/google` | Start Google OAuth flow |
 | GET | `/api/auth/me` | Get current user profile |
-| POST | `/api/analyses` | Create a new analysis |
+| POST | `/api/analyses` | Create a new analysis (costs 1 credit) |
 | GET | `/api/analyses` | List analyses (paginated) |
 | GET | `/api/analyses/:id` | Get full analysis results |
 | GET | `/api/analyses/:id/status` | Poll analysis status |
+| POST | `/api/analyses/:id/share` | Generate share token |
+| DELETE | `/api/analyses/:id/share` | Revoke share link |
+| POST | `/api/billing/checkout` | Create DodoPayments checkout session |
+| GET | `/api/billing/status` | Get user credits and purchase history |
+| POST | `/webhooks/dodo` | DodoPayments webhook (payment.succeeded) |
+
+## Deployment
+
+- **Frontend:** Vercel (auto-deploys from `main`)
+- **Backend:** Render (web service, auto-deploys from `main`)
+- **Database:** Supabase (PostgreSQL)
 
 ## License
 
