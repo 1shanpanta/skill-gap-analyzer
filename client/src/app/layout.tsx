@@ -8,10 +8,73 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const siteUrl = "https://skill-gap-analyzer-nine.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Skill Gap Analyzer",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Skill Gap Analyzer — Match Your Resume to Any Job",
+    template: "%s | Skill Gap Analyzer",
+  },
   description:
-    "Analyze skill gaps between your resume and job descriptions to identify areas for improvement.",
+    "Paste your resume and a job description to get an instant skill-by-skill breakdown, match score, personalized learning roadmap, and resume suggestions.",
+  keywords: [
+    "skill gap analyzer",
+    "resume analyzer",
+    "job description matcher",
+    "resume score",
+    "career tool",
+    "skill assessment",
+    "learning roadmap",
+    "resume improvement",
+  ],
+  authors: [{ name: "Skill Gap Analyzer" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "Skill Gap Analyzer",
+    title: "Skill Gap Analyzer — Match Your Resume to Any Job",
+    description:
+      "Paste your resume and a job description to get an instant skill-by-skill breakdown, match score, personalized learning roadmap, and resume suggestions.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Skill Gap Analyzer — Match Your Resume to Any Job",
+    description:
+      "Paste your resume and a job description to get an instant skill-by-skill breakdown, match score, and a plan for what to learn next.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: siteUrl,
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Skill Gap Analyzer",
+  url: siteUrl,
+  description:
+    "Paste your resume and a job description to get an instant skill-by-skill breakdown, match score, personalized learning roadmap, and resume suggestions.",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Any",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+    description: "First analysis free, then credit packs from $5",
+  },
 };
 
 export default function RootLayout({
@@ -22,6 +85,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
