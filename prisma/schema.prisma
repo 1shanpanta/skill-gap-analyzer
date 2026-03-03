@@ -19,11 +19,13 @@ model User {
   password_reset_expires DateTime?        @db.Timestamptz(6)
   daily_analysis_count   Int              @default(0)
   last_analysis_date     DateTime?        @db.Date
+  credits                Int              @default(1)
   created_at             DateTime         @default(now()) @db.Timestamptz(6)
   updated_at             DateTime         @default(now()) @db.Timestamptz(6)
   analyses               Analysis[]
   job_descriptions       JobDescription[]
   resumes                Resume[]
+  credit_purchases       CreditPurchase[]
 
   @@map("users")
 }
@@ -31,13 +33,17 @@ model User {
 model Resume {
   id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id        String     @db.Uuid
+  name           String     @default("Untitled Resume") @db.VarChar(255)
+  is_saved       Boolean    @default(false)
   raw_text       String
   extracted_data Json?
   created_at     DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime   @default(now()) @db.Timestamptz(6)
   analyses       Analysis[]
   user           User       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "resumes_user_id_foreign")
 
   @@index([user_id], map: "resumes_user_id_index")
+  @@index([user_id, is_saved])
   @@map("resumes")
 }
 
@@ -68,6 +74,8 @@ model Analysis {
   resume_suggestions String?
   token_usage        Json?
   github_url         String?        @db.VarChar(500)
+  content_hash       String?        @db.VarChar(64)
+  share_token        String?        @unique @db.VarChar(64)
   created_at         DateTime       @default(now()) @db.Timestamptz(6)
   completed_at       DateTime?      @db.Timestamptz(6)
   job_description    JobDescription @relation(fields: [job_description_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "analyses_job_description_id_foreign")
@@ -76,7 +84,22 @@ model Analysis {
 
   @@index([status], map: "analyses_status_index")
   @@index([user_id], map: "analyses_user_id_index")
+  @@index([user_id, created_at(sort: Desc)], map: "analyses_user_created_at_index")
+  @@index([user_id, status], map: "analyses_user_status_index")
+  @@index([user_id, content_hash], map: "analyses_user_content_hash_index")
   @@map("analyses")
+}
+
+model AnalysisNote {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  analysis_id String   @db.Uuid
+  user_id     String   @db.Uuid
+  content     String
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([analysis_id])
+  @@map("analysis_notes")
 }
 
 model Job {
@@ -99,4 +122,20 @@ model Job {
   @@index([priority(sort: Desc), scheduled_at], map: "idx_jobs_claimable", where: raw("((status)::text = 'pending'::text)"))
   @@index([started_at], map: "idx_jobs_stale", where: raw("((status)::text = 'processing'::text)"))
   @@map("jobs")
+}
+
+model CreditPurchase {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String   @db.Uuid
+  dodo_payment_id  String   @unique @db.VarChar(255)
+  dodo_customer_id String?  @db.VarChar(255)
+  pack_key         String   @db.VarChar(20)
+  credits          Int
+  amount_cents     Int
+  currency         String   @default("USD") @db.VarChar(3)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  user             User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("credit_purchases")
 }

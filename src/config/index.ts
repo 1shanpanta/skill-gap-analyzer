@@ -30,6 +30,13 @@ const envSchema = z.object({
 
   DAILY_ANALYSIS_LIMIT: z.coerce.number().default(5),
 
+  // DodoPayments
+  DODO_API_KEY: z.string().optional().default(''),
+  DODO_WEBHOOK_SECRET: z.string().optional().default(''),
+  DODO_PRODUCT_10: z.string().optional().default(''),
+  DODO_PRODUCT_30: z.string().optional().default(''),
+  DODO_PRODUCT_100: z.string().optional().default(''),
+
   WORKER_POLL_INTERVAL_MS: z.coerce.number().default(2000),
   JOB_STALE_THRESHOLD_MINUTES: z.coerce.number().default(5),
   JOB_MAX_ATTEMPTS: z.coerce.number().default(3),

@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -11,10 +13,14 @@ import {
   BarChart3,
   Check,
   X,
+  CreditCard,
+  Coins,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { posthog } from "@/lib/posthog";
 import type { UserProfile } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +36,7 @@ import { GoogleSignInButton } from "@/components/google-sign-in-button";
 
 export default function SettingsPage() {
   const { user: authUser } = useAuth();
+  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,10 +57,35 @@ export default function SettingsPage() {
     fetchProfile();
   }, [fetchProfile]);
 
+  // Show success toast when returning from checkout
+  useEffect(() => {
+    if (searchParams.get("billing") === "success") {
+      toast.success("Payment successful! Credits have been added to your account.");
+      posthog.capture("credits_purchased");
+      window.history.replaceState({}, "", "/settings");
+    }
+  }, [searchParams]);
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div>
+          <Skeleton className="h-7 w-24" />
+          <Skeleton className="mt-2 h-4 w-56" />
+        </div>
+        <div className="rounded-lg border p-6 space-y-4">
+          <Skeleton className="h-5 w-16" />
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+        <div className="rounded-lg border p-6 space-y-4">
+          <Skeleton className="h-5 w-36" />
+          <Skeleton className="h-12 w-full" />
+        </div>
       </div>
     );
   }
@@ -112,6 +144,37 @@ export default function SettingsPage() {
             currentName={profile.name}
             onUpdated={(name) => setProfile({ ...profile, name })}
           />
+        </CardContent>
+      </Card>
+
+      {/* Credits */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Coins className="h-4 w-4" />
+            Analysis Credits
+          </CardTitle>
+          <CardDescription>
+            Each analysis uses 1 credit
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-2xl font-bold">{profile.credits}</p>
+              <p className="text-sm text-muted-foreground">
+                {profile.credits === 1
+                  ? "credit remaining"
+                  : "credits remaining"}
+              </p>
+            </div>
+            <Link href="/pricing">
+              <Button size="sm" variant={profile.credits === 0 ? "default" : "outline"}>
+                <CreditCard className="mr-2 h-4 w-4" />
+                Buy credits
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
 
@@ -225,14 +288,6 @@ function EditNameForm({
       }
 
       onUpdated(name.trim());
-      // Update localStorage too
-      const stored = localStorage.getItem("auth_user");
-      if (stored) {
-        const user = JSON.parse(stored);
-        user.name = name.trim();
-        localStorage.setItem("auth_user", JSON.stringify(user));
-      }
-
       toast.success("Name updated");
       setEditing(false);
     } catch (err) {

@@ -17,7 +17,7 @@ export default function LandingPage() {
   const { theme, setTheme } = useTheme();
 
   const ctaHref = user ? "/dashboard" : "/register";
-  const ctaLabel = user ? "Go to Dashboard" : "Try it out";
+  const ctaLabel = user ? "Go to Dashboard" : "Try it free";
 
   return (
     <div className="min-h-screen">
@@ -29,6 +29,11 @@ export default function LandingPage() {
             Skill Gap Analyzer
           </Link>
           <div className="flex items-center gap-3">
+            <Link href="/pricing">
+              <Button variant="ghost" size="sm">
+                Pricing
+              </Button>
+            </Link>
             <Button
               variant="ghost"
               size="icon"
@@ -62,13 +67,13 @@ export default function LandingPage() {
       <section className="container mx-auto px-4 py-20 lg:py-28">
         <div className="mx-auto max-w-2xl space-y-6">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Find out what&apos;s missing between your resume and the job you want
+            How well does your resume match this job?
           </h1>
 
           <p className="text-lg text-muted-foreground">
-            Paste in your resume and a job description. You&apos;ll get a
-            breakdown of which skills match, which ones don&apos;t, and what to
-            learn next.
+            Paste your resume and a job description. Get an instant
+            skill-by-skill breakdown, a match score, and a plan for
+            what to learn next.
           </p>
 
           <div>
@@ -165,10 +170,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl">
             <h2 className="text-xl font-semibold sm:text-2xl">
-              Takes about a minute. Free to use.
+              Takes about a minute. First analysis is free.
             </h2>
             <p className="mt-2 text-muted-foreground">
-              No setup required — just paste and go.
+              No credit card required — just paste and go.
             </p>
             <div className="mt-6">
               <Link href={ctaHref}>
@@ -189,7 +194,18 @@ export default function LandingPage() {
             <BarChart3 className="h-4 w-4" />
             Skill Gap Analyzer
           </div>
-          <p>&copy; {new Date().getFullYear()}</p>
+          <div className="flex items-center gap-4">
+            <Link href="/pricing" className="hover:underline">
+              Pricing
+            </Link>
+            <Link href="/privacy" className="hover:underline">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:underline">
+              Terms
+            </Link>
+            <span>&copy; {new Date().getFullYear()}</span>
+          </div>
         </div>
       </footer>
     </div>

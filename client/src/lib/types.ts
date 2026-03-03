@@ -3,6 +3,7 @@ export interface User {
   email: string;
   name: string;
   avatar_url: string | null;
+  credits: number;
   created_at: string;
 }
 
@@ -61,6 +62,7 @@ export interface AnalysisFull {
   resume_suggestions: string | null;
   token_usage: Record<string, unknown> | null;
   github_url: string | null;
+  share_token: string | null;
   created_at: string;
   completed_at: string | null;
 }
@@ -72,8 +74,26 @@ export interface PaginatedAnalyses {
   limit: number;
 }
 
+export interface AnalysisNote {
+  id: string;
+  analysis_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SavedResume {
+  id: string;
+  name: string;
+  analysis_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ApiError {
   error: string;
   message: string;
+  code?: string;
   statusCode: number;
 }
