@@ -17,9 +17,9 @@ export function getDodoClient(): DodoPayments {
 }
 
 export const CREDIT_PACKS = {
-  pack_10: { credits: 10, price: 500, label: '10 credits', productEnv: 'DODO_PRODUCT_10' as const },
-  pack_30: { credits: 30, price: 1200, label: '30 credits', productEnv: 'DODO_PRODUCT_30' as const },
-  pack_100: { credits: 100, price: 2500, label: '100 credits', productEnv: 'DODO_PRODUCT_100' as const },
+  pack_10: { credits: 5, price: 500, label: '5 credits', productEnv: 'DODO_PRODUCT_10' as const },
+  pack_30: { credits: 15, price: 1000, label: '15 credits', productEnv: 'DODO_PRODUCT_30' as const },
+  pack_100: { credits: 50, price: 2500, label: '50 credits', productEnv: 'DODO_PRODUCT_100' as const },
 } as const;
 
 export type PackKey = keyof typeof CREDIT_PACKS;
