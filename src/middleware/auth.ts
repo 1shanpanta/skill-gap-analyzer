@@ -8,20 +8,24 @@ export interface AuthRequest extends Request {
 }
 
 export function authMiddleware(req: AuthRequest, _res: Response, next: NextFunction): void {
+  // 1. Try httpOnly cookie first
+  const cookieToken = req.cookies?.auth_token;
+  // 2. Fallback to Bearer header
   const header = req.headers.authorization;
+  const bearerToken = header?.startsWith('Bearer ') ? header.slice(7) : null;
 
-  if (!header || !header.startsWith('Bearer ')) {
-    next(new AppError(401, 'Missing or invalid authorization header'));
+  const token = cookieToken || bearerToken;
+
+  if (!token) {
+    next(new AppError(401, 'Authentication required', 'AUTH_REQUIRED'));
     return;
   }
-
-  const token = header.slice(7);
 
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET) as { userId: string };
     req.userId = decoded.userId;
     next();
   } catch {
-    next(new AppError(401, 'Invalid or expired token'));
+    next(new AppError(401, 'Invalid or expired token', 'AUTH_TOKEN_INVALID'));
   }
 }

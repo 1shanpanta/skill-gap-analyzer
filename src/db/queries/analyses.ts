@@ -83,21 +83,70 @@ export async function completeAnalysis(
   });
 }
 
+export async function deleteAnalysis(id: string, userId: string): Promise<boolean> {
+  return prisma.$transaction(async (tx) => {
+    const analysis = await tx.analysis.findFirst({
+      where: { id, user_id: userId },
+    });
+
+    if (!analysis) return false;
+
+    await tx.analysis.delete({ where: { id } });
+
+    // Clean up orphaned resume and JD (only if not used by other analyses)
+    const [resumeUsage, jdUsage] = await Promise.all([
+      tx.analysis.count({ where: { resume_id: analysis.resume_id } }),
+      tx.analysis.count({ where: { job_description_id: analysis.job_description_id } }),
+    ]);
+
+    const deleteOps = [];
+    if (resumeUsage === 0) deleteOps.push(tx.resume.delete({ where: { id: analysis.resume_id } }));
+    if (jdUsage === 0) deleteOps.push(tx.jobDescription.delete({ where: { id: analysis.job_description_id } }));
+    if (deleteOps.length > 0) await Promise.all(deleteOps);
+
+    return true;
+  });
+}
+
+export interface ListAnalysesFilters {
+  status?: string;
+  minScore?: number;
+  maxScore?: number;
+  sort?: 'newest' | 'oldest' | 'score_asc' | 'score_desc';
+}
+
 export async function listAnalysesByUser(
   userId: string,
   page: number,
-  limit: number
+  limit: number,
+  filters?: ListAnalysesFilters
 ) {
   const offset = (page - 1) * limit;
 
+  const where: any = { user_id: userId };
+
+  if (filters?.status) {
+    where.status = filters.status;
+  }
+  if (filters?.minScore !== undefined || filters?.maxScore !== undefined) {
+    where.overall_score = {};
+    if (filters.minScore !== undefined) where.overall_score.gte = filters.minScore;
+    if (filters.maxScore !== undefined) where.overall_score.lte = filters.maxScore;
+  }
+
+  let orderBy: any = { created_at: 'desc' };
+  if (filters?.sort === 'oldest') orderBy = { created_at: 'asc' };
+  else if (filters?.sort === 'score_asc') orderBy = { overall_score: 'asc' };
+  else if (filters?.sort === 'score_desc') orderBy = { overall_score: 'desc' };
+
   const [analyses, total] = await Promise.all([
     prisma.analysis.findMany({
-      where: { user_id: userId },
-      orderBy: { created_at: 'desc' },
+      where,
+      orderBy,
       take: limit,
       skip: offset,
     }),
-    prisma.analysis.count({ where: { user_id: userId } }),
+    prisma.analysis.count({ where }),
   ]);
 
   return { analyses, total };

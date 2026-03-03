@@ -3,7 +3,8 @@ import type { Request, Response, NextFunction } from 'express';
 export class AppError extends Error {
   constructor(
     public statusCode: number,
-    message: string
+    message: string,
+    public code?: string
   ) {
     super(message);
     this.name = 'AppError';
@@ -20,6 +21,7 @@ export function errorHandler(
     res.status(err.statusCode).json({
       error: err.name,
       message: err.message,
+      code: err.code,
       statusCode: err.statusCode,
     });
     return;
@@ -29,6 +31,7 @@ export function errorHandler(
   res.status(500).json({
     error: 'InternalServerError',
     message: 'An unexpected error occurred',
+    code: 'INTERNAL_ERROR',
     statusCode: 500,
   });
 }

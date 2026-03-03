@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowRight,
   Clock,
@@ -101,8 +102,16 @@ export function RecentAnalyses() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between gap-3 rounded-lg border p-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+                <Skeleton className="h-4 w-8" />
+              </div>
+            ))}
           </div>
         ) : error ? (
           <p className="text-sm text-destructive text-center py-6">{error}</p>

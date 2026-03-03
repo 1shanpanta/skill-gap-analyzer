@@ -1,5 +1,6 @@
 import { AnalysisForm } from "@/components/analysis-form";
 import { RecentAnalyses } from "@/components/recent-analyses";
+import { DashboardStats } from "@/components/dashboard-stats";
 
 export default function DashboardPage() {
   return (
@@ -10,6 +11,7 @@ export default function DashboardPage() {
           Run a new analysis or pick up where you left off.
         </p>
       </div>
+      <DashboardStats />
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <AnalysisForm />

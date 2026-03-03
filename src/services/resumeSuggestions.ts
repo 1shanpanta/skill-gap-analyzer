@@ -11,12 +11,16 @@ export async function generateResumeSuggestions(data: ResumeSuggestionsPromptDat
 }> {
   const prompt = buildResumeSuggestionsPrompt(data);
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000);
+
+  try {
   const response = await groq.chat.completions.create({
     model: config.GROQ_MODEL,
     messages: [{ role: 'user', content: prompt }],
     max_tokens: 1500,
     temperature: 0.7,
-  });
+  }, { signal: controller.signal });
 
   const suggestions = response.choices[0]?.message?.content ?? '';
   const tokenUsage = trackTokens('resume_suggestions', {
@@ -25,4 +29,7 @@ export async function generateResumeSuggestions(data: ResumeSuggestionsPromptDat
   }, config.GROQ_MODEL);
 
   return { suggestions, tokenUsage };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
