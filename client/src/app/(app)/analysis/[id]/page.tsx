@@ -40,6 +40,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { posthog } from "@/lib/posthog";
 
 type PageState =
   | { kind: "loading" }
@@ -76,6 +77,12 @@ export default function AnalysisPage() {
 
         const data: AnalysisFull = await res.json();
         setState({ kind: "loaded", analysis: data });
+        if (data.status === "completed") {
+          posthog.capture("analysis_completed", {
+            analysis_id: data.id,
+            score: data.overall_score ? parseFloat(data.overall_score) : null,
+          });
+        }
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "An unexpected error occurred";
@@ -205,6 +212,7 @@ function ExportPDFButton({ analysis }: { analysis: AnalysisFull }) {
       a.download = `analysis-${analysis.id.slice(0, 8)}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+      posthog.capture("pdf_exported", { analysis_id: analysis.id });
     } catch {
       toast.error("Failed to generate PDF");
     } finally {
@@ -238,6 +246,7 @@ function DeleteAnalysisButton({ analysisId }: { analysisId: string }) {
         const err = await res.json();
         throw new Error(err.message || "Failed to delete");
       }
+      posthog.capture("analysis_deleted", { analysis_id: analysisId });
       toast.success("Analysis deleted");
       router.push("/history");
     } catch (err) {
@@ -357,6 +366,7 @@ function ShareButton({ analysis, onUpdate }: { analysis: AnalysisFull; onUpdate:
         if (!res.ok) throw new Error("Failed to create share link");
         const data = await res.json();
         onUpdate({ ...analysis, share_token: data.share_token });
+        posthog.capture("share_link_generated", { analysis_id: analysis.id });
         toast.success("Share link created");
       }
     } catch (err) {

@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Share2 } from "lucide-react";
+import { posthog } from "@/lib/posthog";
 
 type SharedAnalysis = Pick<
   AnalysisFull,
@@ -47,6 +48,10 @@ export default function SharedAnalysisPage() {
         }
         const data = await res.json();
         setAnalysis(data);
+        posthog.capture("share_link_viewed", {
+          analysis_id: data.id,
+          score: data.overall_score ? parseFloat(data.overall_score) : null,
+        });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {

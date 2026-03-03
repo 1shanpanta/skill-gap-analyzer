@@ -1,5 +1,4 @@
 import * as pdfjs from "pdfjs-dist";
-import mammoth from "mammoth";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
@@ -21,6 +20,7 @@ async function extractFromPDF(file: File): Promise<string> {
 }
 
 async function extractFromDOCX(file: File): Promise<string> {
+  const mammoth = await import("mammoth");
   const buffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer: buffer });
   return result.value;

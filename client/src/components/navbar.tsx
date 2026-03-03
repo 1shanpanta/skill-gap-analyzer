@@ -103,7 +103,7 @@ export function Navbar() {
             {user?.avatar_url ? (
               <img
                 src={user.avatar_url}
-                alt=""
+                alt={`${user?.name || "User"} avatar`}
                 className="h-6 w-6 rounded-full"
                 referrerPolicy="no-referrer"
               />
@@ -133,6 +133,7 @@ export function Navbar() {
             className="md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? (
               <X className="h-5 w-5" />
@@ -178,7 +179,7 @@ export function Navbar() {
                 {user?.avatar_url ? (
                   <img
                     src={user.avatar_url}
-                    alt=""
+                    alt={`${user?.name || "User"} avatar`}
                     className="h-6 w-6 rounded-full"
                     referrerPolicy="no-referrer"
                   />

@@ -19,7 +19,7 @@ const createAnalysisSchema = z.object({
   github_url: z
     .string()
     .url()
-    .regex(/github\.com\/[a-zA-Z0-9\-]+/, 'Must be a valid GitHub profile URL')
+    .regex(/^https:\/\/(www\.)?github\.com\/[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?$/, 'Must be a valid GitHub profile URL (https://github.com/username)')
     .optional()
     .nullable(),
 });
@@ -197,6 +197,9 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res, next) => {
     const analysis = await findAnalysisByIdAndUser(req.params.id as string, req.userId!);
     if (!analysis) {
       throw new AppError(404, 'Analysis not found', 'ANALYSIS_NOT_FOUND');
+    }
+    if (analysis.status === 'completed') {
+      res.set('Cache-Control', 'private, max-age=300, stale-while-revalidate=600');
     }
     res.json(analysis);
   } catch (err) {

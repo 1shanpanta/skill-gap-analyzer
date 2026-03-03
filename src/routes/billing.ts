@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { authMiddleware, type AuthRequest } from '../middleware/auth';
 import { config } from '../config/index';
@@ -9,11 +10,19 @@ import { AppError } from '../middleware/errorHandler';
 
 const router = Router();
 
+const checkoutLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'TooManyRequests', message: 'Too many checkout attempts, please try again later', code: 'RATE_LIMIT', statusCode: 429 },
+});
+
 const checkoutSchema = z.object({
   pack: z.enum(['pack_10', 'pack_30', 'pack_100']),
 });
 
-router.post('/checkout', authMiddleware, async (req: AuthRequest, res, next) => {
+router.post('/checkout', checkoutLimiter, authMiddleware, async (req: AuthRequest, res, next) => {
   try {
     const { pack } = checkoutSchema.parse(req.body);
 

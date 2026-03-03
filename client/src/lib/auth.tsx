@@ -147,6 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Best-effort
     }
+    posthog.capture("user_logged_out");
     posthog.reset();
     setUser(null);
     router.push("/login");

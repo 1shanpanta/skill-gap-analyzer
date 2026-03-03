@@ -7,5 +7,6 @@ dist/
 client/.next/
 client/node_modules/
 .claude/
+todo.md
 
 /src/generated/prisma
