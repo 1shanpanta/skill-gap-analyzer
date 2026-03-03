@@ -8,9 +8,18 @@ import {
   CheckCircle2,
   Moon,
   Sun,
+  Shield,
+  CreditCard,
+  Clock,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function LandingPage() {
   const { user, isLoading } = useAuth();
@@ -165,6 +174,130 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* See it in action */}
+      <section className="border-t bg-muted/30 py-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-2xl">
+            <h2 className="mb-8 text-xl font-semibold sm:text-2xl">
+              See what you get
+            </h2>
+
+            <div className="overflow-hidden rounded-lg border bg-background shadow-sm">
+              {/* Browser chrome */}
+              <div className="flex items-center gap-2 border-b bg-muted/50 px-4 py-2.5">
+                <div className="flex gap-1.5">
+                  <div className="h-3 w-3 rounded-full bg-red-400" />
+                  <div className="h-3 w-3 rounded-full bg-yellow-400" />
+                  <div className="h-3 w-3 rounded-full bg-green-400" />
+                </div>
+                <div className="ml-2 flex-1 rounded-md bg-background px-3 py-1 text-xs text-muted-foreground">
+                  skillgap.dev/analysis/a1b2c3d4
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Score gauge mock */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="relative flex h-28 w-28 items-center justify-center rounded-full border-[6px] border-primary">
+                    <span className="text-3xl font-bold">78%</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Overall Match</p>
+                </div>
+
+                {/* Skill bars */}
+                <div className="space-y-3">
+                  {[
+                    { name: "React", level: 92, matched: true },
+                    { name: "TypeScript", level: 85, matched: true },
+                    { name: "GraphQL", level: 0, matched: false },
+                    { name: "AWS", level: 40, matched: false },
+                  ].map((skill) => (
+                    <div key={skill.name} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">{skill.name}</span>
+                        <span className={skill.matched ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                          {skill.matched ? "Matched" : skill.level > 0 ? "Partial" : "Missing"}
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full ${
+                            skill.matched
+                              ? "bg-green-500"
+                              : skill.level > 0
+                                ? "bg-yellow-500"
+                                : "bg-red-300 dark:bg-red-800"
+                          }`}
+                          style={{ width: `${Math.max(skill.level, 4)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-2xl">
+            <h2 className="mb-6 text-xl font-semibold sm:text-2xl">
+              Frequently asked questions
+            </h2>
+
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="scoring">
+                <AccordionTrigger>How does the scoring work?</AccordionTrigger>
+                <AccordionContent>
+                  Your score is a weighted combination of skill matching,
+                  seniority alignment, and optional GitHub signals. Required
+                  skills count more than preferred ones. The breakdown shows
+                  exactly how each factor contributed.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="privacy">
+                <AccordionTrigger>Is my data private?</AccordionTrigger>
+                <AccordionContent>
+                  Yes. Your resume and job descriptions are stored securely and
+                  never shared with third parties. You can delete any analysis
+                  at any time, and the data is permanently removed.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="pricing">
+                <AccordionTrigger>How does pricing work?</AccordionTrigger>
+                <AccordionContent>
+                  You get free credits to start. Each analysis costs 1 credit.
+                  When you need more, you can purchase credit packs — no
+                  subscription required. Unused credits never expire.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="github">
+                <AccordionTrigger>Do I need a GitHub account?</AccordionTrigger>
+                <AccordionContent>
+                  No. GitHub analysis is completely optional. If you provide a
+                  GitHub profile URL, we&apos;ll factor in your public repos,
+                  languages, and activity. Without it, scoring is based solely
+                  on your resume vs. the job description.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="accuracy">
+                <AccordionTrigger>How accurate is the analysis?</AccordionTrigger>
+                <AccordionContent>
+                  The analysis uses a combination of deterministic skill
+                  matching and AI-powered extraction to catch synonyms and
+                  related technologies. It&apos;s designed to give you a
+                  realistic picture, not an inflated one — so you know exactly
+                  where to focus.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="border-t bg-muted/30 py-16">
         <div className="container mx-auto px-4">
@@ -182,6 +315,26 @@ export default function LandingPage() {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust signals */}
+      <section className="py-10">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto flex max-w-2xl flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span>No credit card required</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              <span>Your data is never shared</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span>Results in under a minute</span>
             </div>
           </div>
         </div>
