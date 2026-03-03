@@ -84,29 +84,6 @@ function userResponse(user: { id: string; email: string; name: string; created_a
   };
 }
 
-// POST /api/auth/dev-login — dev-only auto login, creates user if needed
-router.post('/dev-login', async (req, res, next) => {
-  try {
-    if (config.NODE_ENV !== 'development') {
-      throw new AppError(404, 'Not found');
-    }
-
-    const devEmail = 'dev@localhost';
-    let user = await findByEmail(devEmail);
-
-    if (!user) {
-      const hash = await bcrypt.hash('devpassword1', config.BCRYPT_SALT_ROUNDS);
-      user = await createUser(devEmail, 'Dev User', hash);
-    }
-
-    const token = generateToken(user.id);
-    setAuthCookie(res, token);
-    res.json({ user: userResponse(user), token });
-  } catch (err) {
-    next(err);
-  }
-});
-
 // POST /api/auth/register
 router.post('/register', authLimiter, async (req, res, next) => {
   try {

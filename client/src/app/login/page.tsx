@@ -38,15 +38,12 @@ function LoginContent() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Auto-login with dev bypass for now (skip auth)
+  // Redirect to dashboard if already authenticated
   useEffect(() => {
-    if (!authLoading && !user) {
-      login("", "");
-    }
     if (!authLoading && user) {
       router.replace("/dashboard");
     }
-  }, [authLoading, user, router, login]);
+  }, [authLoading, user, router]);
 
   // Show Google auth error if redirected from failed OAuth
   useEffect(() => {

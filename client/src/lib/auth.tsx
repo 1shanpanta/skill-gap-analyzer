@@ -61,16 +61,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      // Dev bypass: empty fields → hit dev-login endpoint
-      const endpoint =
-        !email && !password ? "/api/auth/dev-login" : "/api/auth/login";
-      const body = !email && !password ? {} : { email, password };
-
-      const res = await fetch(endpoint, {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(body),
+        body: JSON.stringify({ email, password }),
       });
 
       if (!res.ok) {
