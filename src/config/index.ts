@@ -28,8 +28,6 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional().default(''),
   RESEND_FROM_EMAIL: z.string().optional().default('noreply@skillgap.dev'),
 
-  DAILY_ANALYSIS_LIMIT: z.coerce.number().default(5),
-
   // DodoPayments
   DODO_API_KEY: z.string().optional().default(''),
   DODO_WEBHOOK_SECRET: z.string().optional().default(''),

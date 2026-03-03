@@ -320,7 +320,6 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res, next) => {
       has_password: !!user.password_hash,
       has_google: !!user.google_id,
       credits: user.credits,
-      daily_analysis_count: user.daily_analysis_count,
       total_analyses: user._count.analyses,
       created_at: user.created_at,
     });

@@ -17,7 +17,7 @@ export async function rateLimitMiddleware(req: AuthRequest, _res: Response, next
     }
 
     if (user.credits <= 0) {
-      next(new AppError(429, 'No analysis credits remaining. Purchase more to continue.', 'NO_CREDITS'));
+      next(new AppError(402, 'No analysis credits remaining. Purchase more to continue.', 'NO_CREDITS'));
       return;
     }
 

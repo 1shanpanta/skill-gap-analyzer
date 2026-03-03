@@ -128,8 +128,6 @@ router.post('/', authMiddleware, rateLimitMiddleware, async (req: AuthRequest, r
         where: { id: userId },
         data: {
           credits: { decrement: 1 },
-          daily_analysis_count: { increment: 1 },
-          last_analysis_date: new Date(),
           updated_at: new Date(),
         },
       });

@@ -18,17 +18,6 @@ export async function findById(id: string) {
   return prisma.user.findUnique({ where: { id } });
 }
 
-export async function resetDailyCount(id: string): Promise<void> {
-  await prisma.user.update({
-    where: { id },
-    data: {
-      daily_analysis_count: 0,
-      last_analysis_date: new Date(),
-      updated_at: new Date(),
-    },
-  });
-}
-
 export async function findByGoogleId(googleId: string) {
   return prisma.user.findUnique({ where: { google_id: googleId } });
 }
