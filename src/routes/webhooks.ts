@@ -4,12 +4,13 @@ import { config } from '../config/index';
 import { findByEmail } from '../db/queries/users';
 import { addCredits, getPurchaseByPaymentId } from '../db/queries/credits';
 import { CREDIT_PACKS, type PackKey } from '../services/dodo';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
 router.post('/dodo', raw({ type: 'application/json' }), async (req, res) => {
   if (!config.DODO_WEBHOOK_SECRET) {
-    console.error('DODO_WEBHOOK_SECRET not configured');
+    logger.error('DODO_WEBHOOK_SECRET not configured');
     res.status(500).json({ error: 'Webhook secret not configured' });
     return;
   }
@@ -40,7 +41,7 @@ router.post('/dodo', raw({ type: 'application/json' }), async (req, res) => {
 
     res.json({ received: true });
   } catch (err) {
-    console.error('Webhook processing error:', err);
+    logger.error({ err }, 'Webhook processing error');
     res.status(500).json({ error: 'Webhook processing failed' });
   }
 });
@@ -64,7 +65,7 @@ async function handlePaymentSucceeded(data: {
   });
 
   if (!packEntry) {
-    console.error('Unknown product in payment:', data.product_cart);
+    logger.error({ productCart: data.product_cart }, 'Unknown product in payment');
     return;
   }
 
@@ -77,7 +78,7 @@ async function handlePaymentSucceeded(data: {
   if (!resolvedUserId) {
     const user = await findByEmail(data.customer.email);
     if (!user) {
-      console.error(`No user found for email: ${data.customer.email}`);
+      logger.error({ email: data.customer.email }, 'No user found for webhook email');
       return;
     }
     resolvedUserId = user.id;

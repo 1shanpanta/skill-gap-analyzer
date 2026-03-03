@@ -9,6 +9,7 @@ import { extractSkillsFromResume, extractSkillsFromJD } from './skillExtractor';
 import { calculateOverallScore, type GitHubSignals } from './scorer';
 import { simulateEmailNotification } from './emailSimulator';
 import { config } from '../config/index';
+import { logger } from '../lib/logger';
 
 export async function runAnalysisPipeline(
   analysisId: string
@@ -40,7 +41,7 @@ export async function runAnalysisPipeline(
         resumeData = enhanced.resumeData;
         jdData = enhanced.jdData;
       } catch {
-        console.warn('LLM skill extraction failed, continuing with deterministic only');
+        logger.warn({ analysisId }, 'LLM skill extraction failed, continuing with deterministic only');
       }
     }
 
@@ -51,7 +52,7 @@ export async function runAnalysisPipeline(
         const { fetchGitHubSignals } = await import('./githubAnalyzer');
         githubSignals = await fetchGitHubSignals(analysis.github_url);
       } catch {
-        console.warn(`GitHub analysis failed for ${analysis.github_url}, continuing without it`);
+        logger.warn({ analysisId, githubUrl: analysis.github_url }, 'GitHub analysis failed, continuing without it');
       }
     }
 
@@ -96,7 +97,7 @@ export async function runAnalysisPipeline(
         estimated_cost_usd: roadmapResult.tokenUsage.estimated_cost_usd + suggestionsResult.tokenUsage.estimated_cost_usd,
       };
     } catch {
-      console.warn('LLM integration not available, using placeholder text');
+      logger.warn({ analysisId }, 'LLM integration not available, using placeholder text');
     }
 
     // 6. Save results

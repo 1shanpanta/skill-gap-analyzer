@@ -1,9 +1,9 @@
+import { logger } from '../lib/logger';
+
 export function simulateEmailNotification(
   email: string,
   analysisId: string,
   overallScore: number
 ): void {
-  console.log(
-    `\n📧 EMAIL SENT to ${email}: Analysis ${analysisId} complete. Score: ${overallScore}/100\n`
-  );
+  logger.info({ email, analysisId, overallScore }, 'Email notification sent (simulated)');
 }

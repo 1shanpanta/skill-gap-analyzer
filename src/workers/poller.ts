@@ -2,11 +2,12 @@ import { randomUUID } from 'crypto';
 import { config } from '../config/index';
 import { claimJob, completeJob, failJob, recoverStaleJobs } from '../db/queries/jobs';
 import { handleJob } from './handlers';
+import { logger } from '../lib/logger';
 
 const WORKER_ID = `worker-${randomUUID().slice(0, 8)}`;
 
 export function startWorker(): void {
-  console.log(`[${WORKER_ID}] Worker started. Polling every ${config.WORKER_POLL_INTERVAL_MS}ms.`);
+  logger.info({ workerId: WORKER_ID, pollIntervalMs: config.WORKER_POLL_INTERVAL_MS }, 'Worker started');
 
   // Main polling loop
   const pollTimer = setInterval(async () => {
@@ -14,18 +15,18 @@ export function startWorker(): void {
       const job = await claimJob(WORKER_ID);
       if (!job) return;
 
-      console.log(`[${WORKER_ID}] Claimed job ${job.id} (type: ${job.type}, attempt: ${job.attempts})`);
+      logger.info({ workerId: WORKER_ID, jobId: job.id, type: job.type, attempt: job.attempts }, 'Claimed job');
 
       try {
         const result = await handleJob(job);
         await completeJob(job.id, result);
-        console.log(`[${WORKER_ID}] Completed job ${job.id}`);
+        logger.info({ workerId: WORKER_ID, jobId: job.id }, 'Completed job');
       } catch (err: any) {
-        console.error(`[${WORKER_ID}] Job ${job.id} failed:`, err.message);
+        logger.error({ workerId: WORKER_ID, jobId: job.id, err: err.message }, 'Job failed');
         await failJob(job.id, err.message);
       }
     } catch (err) {
-      console.error(`[${WORKER_ID}] Poll error:`, err);
+      logger.error({ workerId: WORKER_ID, err }, 'Poll error');
     }
   }, config.WORKER_POLL_INTERVAL_MS);
 
@@ -34,16 +35,16 @@ export function startWorker(): void {
     try {
       const recovered = await recoverStaleJobs(config.JOB_STALE_THRESHOLD_MINUTES);
       if (recovered > 0) {
-        console.log(`[${WORKER_ID}] Recovered ${recovered} stale jobs`);
+        logger.info({ workerId: WORKER_ID, recovered }, 'Recovered stale jobs');
       }
     } catch (err) {
-      console.error(`[${WORKER_ID}] Stale recovery error:`, err);
+      logger.error({ workerId: WORKER_ID, err }, 'Stale recovery error');
     }
   }, 60_000);
 
   // Graceful shutdown
   const shutdown = () => {
-    console.log(`[${WORKER_ID}] Shutting down...`);
+    logger.info({ workerId: WORKER_ID }, 'Shutting down');
     clearInterval(pollTimer);
     clearInterval(staleTimer);
   };

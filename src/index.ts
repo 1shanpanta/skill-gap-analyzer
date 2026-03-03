@@ -11,6 +11,7 @@ import { billingRouter } from './routes/billing';
 import { webhooksRouter } from './routes/webhooks';
 import { errorHandler } from './middleware/errorHandler';
 import { startWorker } from './workers/poller';
+import { logger } from './lib/logger';
 
 const app = express();
 
@@ -84,7 +85,7 @@ app.get('/api/shared/:token', async (req, res, next) => {
 app.use(errorHandler);
 
 const server = app.listen(config.PORT, () => {
-  console.log(`Server running on port ${config.PORT}`);
+  logger.info({ port: config.PORT }, 'Server running');
   startWorker();
 });
 

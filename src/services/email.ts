@@ -1,10 +1,11 @@
 import { Resend } from 'resend';
 import { config } from '../config/index';
+import { logger } from '../lib/logger';
 
 const resend = config.RESEND_API_KEY ? new Resend(config.RESEND_API_KEY) : null;
 
 if (!resend && config.NODE_ENV === 'production') {
-  console.warn('⚠️  RESEND_API_KEY is not set — password reset emails will not be sent in production');
+  logger.warn('RESEND_API_KEY is not set — password reset emails will not be sent in production');
 }
 
 function escapeHtml(str: string): string {
@@ -17,7 +18,7 @@ export async function sendPasswordResetEmail(
   userName: string
 ): Promise<void> {
   if (!resend) {
-    console.log(`\n📧 PASSWORD RESET for ${to}:\n   ${resetUrl}\n`);
+    logger.info({ to, resetUrl }, 'Password reset email (dev mode)');
     return;
   }
 
@@ -43,7 +44,7 @@ export async function sendPasswordResetEmail(
       `,
     });
   } catch (err) {
-    console.error('Failed to send password reset email:', err instanceof Error ? err.message : err);
+    logger.error({ err: err instanceof Error ? err.message : err }, 'Failed to send password reset email');
     throw new Error('Failed to send password reset email');
   }
 }
