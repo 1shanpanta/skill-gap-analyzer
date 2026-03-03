@@ -24,6 +24,7 @@ import { AppError } from '../middleware/errorHandler';
 import { authMiddleware, type AuthRequest } from '../middleware/auth';
 import { sendPasswordResetEmail } from '../services/email';
 import { getGoogleAuthUrl, getGoogleUser } from '../services/google-auth';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -272,8 +273,10 @@ router.get('/google/callback', async (req, res) => {
 
     res.redirect(`${frontendUrl}/auth/google/callback`);
   } catch (err) {
+    const reason = err instanceof AppError ? err.code || err.message : err instanceof Error ? err.message : 'unknown';
+    logger.error({ err, reason }, 'Google OAuth callback failed');
     const frontendUrl = config.FRONTEND_URL || 'http://localhost:3001';
-    res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
+    res.redirect(`${frontendUrl}/login?error=google_auth_failed&reason=${encodeURIComponent(reason)}`);
   }
 });
 
