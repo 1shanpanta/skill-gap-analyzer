@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import useSWR from "swr";
 import type { AnalysisFull } from "@/lib/types";
 import { ScoreGauge } from "@/components/score-gauge";
 import { ScoreBreakdownCard } from "@/components/score-breakdown";
@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Share2 } from "lucide-react";
 import { posthog } from "@/lib/posthog";
+import { useEffect } from "react";
 
 type SharedAnalysis = Pick<
   AnalysisFull,
@@ -29,38 +30,34 @@ type SharedAnalysis = Pick<
   | "completed_at"
 >;
 
+async function sharedFetcher(url: string): Promise<SharedAnalysis> {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(
+      res.status === 404
+        ? "This shared analysis doesn't exist or has been revoked."
+        : "Failed to load shared analysis."
+    );
+  }
+  return res.json();
+}
+
 export default function SharedAnalysisPage() {
   const params = useParams<{ token: string }>();
-  const [analysis, setAnalysis] = useState<SharedAnalysis | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: analysis, error, isLoading } = useSWR(
+    `/api/shared/${params.token}`,
+    sharedFetcher,
+    { revalidateOnFocus: false }
+  );
 
   useEffect(() => {
-    async function fetchShared() {
-      try {
-        const res = await fetch(`/api/shared/${params.token}`);
-        if (!res.ok) {
-          throw new Error(
-            res.status === 404
-              ? "This shared analysis doesn't exist or has been revoked."
-              : "Failed to load shared analysis."
-          );
-        }
-        const data = await res.json();
-        setAnalysis(data);
-        posthog.capture("share_link_viewed", {
-          analysis_id: data.id,
-          score: data.overall_score ? parseFloat(data.overall_score) : null,
-        });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong.");
-      } finally {
-        setIsLoading(false);
-      }
+    if (analysis) {
+      posthog.capture("share_link_viewed", {
+        analysis_id: analysis.id,
+        score: analysis.overall_score ? parseFloat(analysis.overall_score) : null,
+      });
     }
-
-    fetchShared();
-  }, [params.token]);
+  }, [analysis]);
 
   if (isLoading) {
     return (
@@ -84,7 +81,7 @@ export default function SharedAnalysisPage() {
             <AlertTriangle className="h-10 w-10 text-destructive" />
             <div className="text-center">
               <h2 className="text-lg font-semibold">
-                {error || "Analysis not found"}
+                {error?.message || "Analysis not found"}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 The link may have been revoked or the analysis deleted.

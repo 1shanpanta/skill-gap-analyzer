@@ -1,37 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { useAnalysisStats } from "@/hooks/useAnalysisData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart3, CheckCircle2, Target, TrendingUp } from "lucide-react";
 
-interface Stats {
-  total: number;
-  completed: number;
-  average_score: number | null;
-  status_counts: Record<string, number>;
-}
-
 export function DashboardStats() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const res = await apiFetch("/api/analyses/stats");
-        if (res.ok) {
-          setStats(await res.json());
-        }
-      } catch {
-        // Silently fail — stats are not critical
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchStats();
-  }, []);
+  const { data: stats, isLoading } = useAnalysisStats();
 
   if (isLoading) {
     return (

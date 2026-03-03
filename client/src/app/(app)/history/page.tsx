@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/api";
-import type { AnalysisSummary, PaginatedAnalyses } from "@/lib/types";
+import { useAnalyses } from "@/hooks/useAnalysisData";
 import { AnalysisCard } from "@/components/analysis-card";
 import { Pagination } from "@/components/pagination";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, FileSearch, X, GitCompareArrows } from "lucide-react";
+import { Plus, FileSearch, X, GitCompareArrows, Download } from "lucide-react";
+import { apiFetch } from "@/lib/api";
+import { toast } from "sonner";
 
 const LIMIT = 10;
 
@@ -29,58 +30,18 @@ const defaultFilters: Filters = { status: "all", sort: "newest" };
 
 export default function HistoryPage() {
   const router = useRouter();
-  const [analyses, setAnalyses] = useState<AnalysisSummary[]>([]);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [compareMode, setCompareMode] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
 
+  const { data, isLoading, error, mutate } = useAnalyses(page, LIMIT, filters);
+
+  const analyses = data?.analyses ?? [];
+  const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / LIMIT);
   const hasActiveFilters =
     filters.status !== "all" || filters.sort !== "newest";
-
-  const fetchAnalyses = useCallback(
-    async (currentPage: number, currentFilters: Filters) => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const params = new URLSearchParams({
-          page: String(currentPage),
-          limit: String(LIMIT),
-        });
-        if (currentFilters.status !== "all")
-          params.set("status", currentFilters.status);
-        if (currentFilters.sort !== "newest")
-          params.set("sort", currentFilters.sort);
-
-        const res = await apiFetch(`/api/analyses?${params}`);
-
-        if (!res.ok) {
-          throw new Error("Failed to load analyses. Please try again.");
-        }
-
-        const data: PaginatedAnalyses = await res.json();
-        setAnalyses(data.analyses);
-        setTotal(data.total);
-        setPage(data.page);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "An unexpected error occurred."
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    fetchAnalyses(page, filters);
-  }, [fetchAnalyses, page, filters]);
 
   function handlePageChange(newPage: number) {
     setPage(newPage);
@@ -121,12 +82,36 @@ export default function HistoryPage() {
             All your past runs in one place.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard">
-            <Plus className="mr-2 h-4 w-4" />
-            New Analysis
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              try {
+                const res = await apiFetch("/api/analyses/export?format=csv");
+                if (!res.ok) throw new Error("Export failed");
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "analyses.csv";
+                a.click();
+                URL.revokeObjectURL(url);
+              } catch {
+                toast.error("Failed to export CSV");
+              }
+            }}
+          >
+            <Download className="mr-1 h-4 w-4" />
+            Export CSV
+          </Button>
+          <Button asChild>
+            <Link href="/dashboard">
+              <Plus className="mr-2 h-4 w-4" />
+              New Analysis
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Filter bar */}
@@ -231,12 +216,14 @@ export default function HistoryPage() {
           <div className="rounded-full bg-destructive/10 p-3">
             <FileSearch className="h-6 w-6 text-destructive" />
           </div>
-          <p className="mt-4 text-sm font-medium text-destructive">{error}</p>
+          <p className="mt-4 text-sm font-medium text-destructive">
+            Failed to load analyses. Please try again.
+          </p>
           <Button
             variant="outline"
             size="sm"
             className="mt-4"
-            onClick={() => fetchAnalyses(page, filters)}
+            onClick={() => mutate()}
           >
             Try Again
           </Button>
@@ -280,7 +267,7 @@ export default function HistoryPage() {
               <AnalysisCard
                 key={analysis.id}
                 analysis={analysis}
-                onDeleted={() => fetchAnalyses(page, filters)}
+                onDeleted={() => mutate()}
                 compareMode={compareMode}
                 isSelected={compareIds.includes(analysis.id)}
                 onToggleCompare={toggleCompareId}

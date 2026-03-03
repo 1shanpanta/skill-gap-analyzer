@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { apiFetch } from "@/lib/api";
-import type { AnalysisSummary, PaginatedAnalyses } from "@/lib/types";
+import { useRecentAnalyses } from "@/hooks/useAnalysisData";
+import type { AnalysisSummary } from "@/lib/types";
 import {
   Card,
   CardContent,
@@ -58,34 +57,10 @@ function formatDate(dateString: string): string {
 }
 
 export function RecentAnalyses() {
-  const [analyses, setAnalyses] = useState<AnalysisSummary[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error } = useRecentAnalyses();
 
-  useEffect(() => {
-    async function fetchRecent() {
-      try {
-        const res = await apiFetch("/api/analyses?page=1&limit=3");
-
-        if (!res.ok) {
-          throw new Error("Failed to load recent analyses.");
-        }
-
-        const data: PaginatedAnalyses = await res.json();
-        setAnalyses(data.analyses);
-        setTotal(data.total);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "An unexpected error occurred."
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchRecent();
-  }, []);
+  const analyses = data?.analyses ?? [];
+  const total = data?.total ?? 0;
 
   return (
     <Card>
@@ -114,7 +89,9 @@ export function RecentAnalyses() {
             ))}
           </div>
         ) : error ? (
-          <p className="text-sm text-destructive text-center py-6">{error}</p>
+          <p className="text-sm text-destructive text-center py-6">
+            Failed to load recent analyses.
+          </p>
         ) : analyses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <FileSearch className="h-8 w-8 text-muted-foreground" />
@@ -124,7 +101,7 @@ export function RecentAnalyses() {
           </div>
         ) : (
           <div className="space-y-3">
-            {analyses.map((analysis) => {
+            {analyses.map((analysis: AnalysisSummary) => {
               const config = statusConfig[analysis.status];
               const StatusIcon = config.icon;
               const score = analysis.overall_score

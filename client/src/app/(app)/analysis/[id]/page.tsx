@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import type { AnalysisFull } from "@/lib/types";
+import { useAnalysis } from "@/hooks/useAnalysisData";
 import { useAnalysisSSE } from "@/hooks/useAnalysisSSE";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ScoreGauge } from "@/components/score-gauge";
@@ -50,72 +51,43 @@ type PageState =
 export default function AnalysisPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const [state, setState] = useState<PageState>({ kind: "loading" });
+  const { data: analysis, error: swrError, isLoading, mutate } = useAnalysis(params.id);
 
   // Determine if we need polling (pending/processing)
   const needsPolling =
-    state.kind === "loaded" &&
-    (state.analysis.status === "pending" ||
-      state.analysis.status === "processing");
+    analysis &&
+    (analysis.status === "pending" || analysis.status === "processing");
 
   const { status: pollStatus } = useAnalysisSSE(
     needsPolling ? params.id : null
   );
 
-  // Fetch analysis data
+  // Track completion in posthog
   useEffect(() => {
-    async function fetchAnalysis() {
-      try {
-        const res = await apiFetch(`/api/analyses/${params.id}`);
-
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => null);
-          throw new Error(
-            errorData?.message ?? `Failed to load analysis (${res.status})`
-          );
-        }
-
-        const data: AnalysisFull = await res.json();
-        setState({ kind: "loaded", analysis: data });
-        if (data.status === "completed") {
-          posthog.capture("analysis_completed", {
-            analysis_id: data.id,
-            score: data.overall_score ? parseFloat(data.overall_score) : null,
-          });
-        }
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "An unexpected error occurred";
-        setState({ kind: "error", message });
-        toast.error(message);
-      }
+    if (analysis?.status === "completed") {
+      posthog.capture("analysis_completed", {
+        analysis_id: analysis.id,
+        score: analysis.overall_score ? parseFloat(analysis.overall_score) : null,
+      });
     }
-
-    fetchAnalysis();
-  }, [params.id]);
+  }, [analysis?.status, analysis?.id, analysis?.overall_score]);
 
   // When polling detects completion or failure, re-fetch full data
   useEffect(() => {
     if (!pollStatus) return;
-
-    if (
-      pollStatus.status === "completed" ||
-      pollStatus.status === "failed"
-    ) {
-      async function refetch() {
-        try {
-          const res = await apiFetch(`/api/analyses/${params.id}`);
-          if (res.ok) {
-            const data: AnalysisFull = await res.json();
-            setState({ kind: "loaded", analysis: data });
-          }
-        } catch {
-          // Ignore refetch errors
-        }
-      }
-      refetch();
+    if (pollStatus.status === "completed" || pollStatus.status === "failed") {
+      mutate();
     }
-  }, [pollStatus, params.id]);
+  }, [pollStatus, mutate]);
+
+  // Map SWR state to the original PageState for rendering
+  const state: PageState = isLoading
+    ? { kind: "loading" }
+    : swrError
+      ? { kind: "error", message: swrError instanceof Error ? swrError.message : "An unexpected error occurred" }
+      : analysis
+        ? { kind: "loaded", analysis }
+        : { kind: "loading" };
 
   return (
     <div className="space-y-8">
@@ -190,7 +162,7 @@ export default function AnalysisPage() {
       {state.kind === "loaded" && (
         <AnalysisContent
           analysis={state.analysis}
-          onUpdate={(a) => setState({ kind: "loaded", analysis: a })}
+          onUpdate={(a) => mutate(a, false)}
         />
       )}
     </div>

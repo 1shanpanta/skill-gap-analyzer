@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { posthog } from "@/lib/posthog";
-import type { UserProfile } from "@/lib/types";
+import { useUserProfile } from "@/hooks/useUser";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -37,25 +37,7 @@ import { GoogleSignInButton } from "@/components/google-sign-in-button";
 export default function SettingsPage() {
   const { user: authUser } = useAuth();
   const searchParams = useSearchParams();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchProfile = useCallback(async () => {
-    try {
-      const res = await apiFetch("/api/auth/me");
-      if (res.ok) {
-        setProfile(await res.json());
-      }
-    } catch {
-      toast.error("Failed to load profile");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  const { data: profile, isLoading: loading, mutate } = useUserProfile();
 
   // Show success toast when returning from checkout
   useEffect(() => {
@@ -142,7 +124,7 @@ export default function SettingsPage() {
 
           <EditNameForm
             currentName={profile.name}
-            onUpdated={(name) => setProfile({ ...profile, name })}
+            onUpdated={(name) => mutate({ ...profile, name }, false)}
           />
         </CardContent>
       </Card>
@@ -224,7 +206,7 @@ export default function SettingsPage() {
             {profile.has_google ? (
               <UnlinkGoogleButton
                 hasPassword={profile.has_password}
-                onUnlinked={() => setProfile({ ...profile, has_google: false })}
+                onUnlinked={() => mutate({ ...profile, has_google: false }, false)}
               />
             ) : (
               <GoogleSignInButton label="Connect" />
