@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -101,10 +102,12 @@ export function Navbar() {
             className="hidden items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-accent sm:flex"
           >
             {user?.avatar_url ? (
-              <img
+              <Image
                 src={user.avatar_url}
                 alt={`${user?.name || "User"} avatar`}
-                className="h-6 w-6 rounded-full"
+                width={24}
+                height={24}
+                className="rounded-full"
                 referrerPolicy="no-referrer"
               />
             ) : (
@@ -177,10 +180,12 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-accent"
               >
                 {user?.avatar_url ? (
-                  <img
+                  <Image
                     src={user.avatar_url}
                     alt={`${user?.name || "User"} avatar`}
-                    className="h-6 w-6 rounded-full"
+                    width={24}
+                    height={24}
+                    className="rounded-full"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
