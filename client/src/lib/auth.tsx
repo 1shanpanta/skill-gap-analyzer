@@ -9,15 +9,15 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
-import type { ApiError, AuthResponse, User } from "@/lib/types";
+import { posthog } from "@/lib/posthog";
+import type { ApiError, User } from "@/lib/types";
 
 interface AuthContextValue {
   user: User | null;
-  token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, name: string, password: string) => Promise<void>;
-  loginWithToken: (token: string, user: User) => void;
+  loginWithGoogle: () => void;
   logout: () => void;
 }
 
@@ -26,43 +26,50 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Hydrate from localStorage on mount
+  // Hydrate from /api/auth/me on mount (cookie is sent automatically)
   useEffect(() => {
-    const storedToken = localStorage.getItem("auth_token");
-    const storedUser = localStorage.getItem("auth_user");
-
-    if (storedToken && storedUser) {
+    async function hydrate() {
       try {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser) as User);
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          const u = {
+            id: data.id,
+            email: data.email,
+            name: data.name,
+            avatar_url: data.avatar_url,
+            credits: data.credits ?? 0,
+            created_at: data.created_at,
+          };
+          setUser(u);
+          posthog.identify(u.id, { email: u.email, name: u.name });
+        }
       } catch {
+        // Not authenticated — that's fine
+      } finally {
+        // Clean up any legacy localStorage tokens
         localStorage.removeItem("auth_token");
         localStorage.removeItem("auth_user");
+        setIsLoading(false);
       }
     }
 
-    setIsLoading(false);
-  }, []);
-
-  const persistAuth = useCallback((data: AuthResponse) => {
-    localStorage.setItem("auth_token", data.token);
-    localStorage.setItem("auth_user", JSON.stringify(data.user));
-    setToken(data.token);
-    setUser(data.user);
+    hydrate();
   }, []);
 
   const login = useCallback(
     async (email: string, password: string) => {
-      // Dev bypass: empty fields → hit dev-login endpoint for a real JWT
-      const endpoint = !email && !password ? "/api/auth/dev-login" : "/api/auth/login";
+      // Dev bypass: empty fields → hit dev-login endpoint
+      const endpoint =
+        !email && !password ? "/api/auth/dev-login" : "/api/auth/login";
       const body = !email && !password ? {} : { email, password };
 
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(body),
       });
 
@@ -71,11 +78,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error(err.message);
       }
 
-      const data: AuthResponse = await res.json();
-      persistAuth(data);
+      const data = await res.json();
+      setUser(data.user);
+      posthog.identify(data.user.id, { email: data.user.email, name: data.user.name });
+      posthog.capture("user_logged_in");
       router.push("/dashboard");
     },
-    [persistAuth, router]
+    [router]
   );
 
   const register = useCallback(
@@ -83,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, name, password }),
       });
 
@@ -91,32 +101,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error(err.message);
       }
 
-      const data: AuthResponse = await res.json();
-      persistAuth(data);
+      const data = await res.json();
+      setUser(data.user);
+      posthog.identify(data.user.id, { email: data.user.email, name: data.user.name });
+      posthog.capture("user_signed_up");
       router.push("/dashboard");
     },
-    [persistAuth, router]
+    [router]
   );
 
-  const loginWithToken = useCallback(
-    (newToken: string, newUser: User) => {
-      persistAuth({ token: newToken, user: newUser });
-      router.push("/dashboard");
-    },
-    [persistAuth, router]
-  );
+  const loginWithGoogle = useCallback(() => {
+    // After Google OAuth, the backend sets the cookie and redirects
+    // to /auth/google/callback, which hydrates the user from /api/auth/me
+    async function hydrate() {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          const u = {
+            id: data.id,
+            email: data.email,
+            name: data.name,
+            avatar_url: data.avatar_url,
+            credits: data.credits ?? 0,
+            created_at: data.created_at,
+          };
+          setUser(u);
+          posthog.identify(u.id, { email: u.email, name: u.name });
+          posthog.capture("user_logged_in", { method: "google" });
+          router.push("/dashboard");
+        }
+      } catch {
+        // Will be handled by the callback page
+      }
+    }
+    hydrate();
+  }, [router]);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_user");
-    setToken(null);
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // Best-effort
+    }
+    posthog.reset();
     setUser(null);
     router.push("/login");
   }, [router]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, token, isLoading, login, register, loginWithToken, logout }),
-    [user, token, isLoading, login, register, loginWithToken, logout]
+    () => ({ user, isLoading, login, register, loginWithGoogle, logout }),
+    [user, isLoading, login, register, loginWithGoogle, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
