@@ -11,7 +11,7 @@ import {
   Loader2,
   Moon,
   Sun,
-  Sparkles,
+  Gift,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
@@ -86,12 +86,13 @@ export default function PricingPage() {
         body: JSON.stringify({ pack: packKey }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to create checkout");
+        throw new Error(data.message || "Failed to create checkout");
       }
 
-      const { checkout_url } = await res.json();
+      const { checkout_url } = data;
       window.location.href = checkout_url;
     } catch (err) {
       toast.error(
@@ -158,7 +159,7 @@ export default function PricingPage() {
       {/* Free tier callout */}
       <section className="container mx-auto px-4 pb-8">
         <div className="mx-auto max-w-sm rounded-lg border bg-muted/30 p-6 text-center">
-          <Sparkles className="mx-auto mb-2 h-6 w-6 text-primary" />
+          <Gift className="mx-auto mb-2 h-6 w-6 text-primary" />
           <h3 className="font-semibold">1 free analysis</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Every account gets one analysis on the house. No credit card
