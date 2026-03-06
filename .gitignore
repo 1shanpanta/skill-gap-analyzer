@@ -10,3 +10,4 @@ client/node_modules/
 todo.md
 
 /src/generated/prisma
+.vercel
