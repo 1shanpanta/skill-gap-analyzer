@@ -19,7 +19,7 @@ export default function PrivacyPage() {
           Last updated: March 2026
         </p>
 
-        <div className="mt-8 space-y-6 text-sm leading-relaxed text-muted-foreground">
+        <div className="mt-8 divide-y divide-border text-sm leading-relaxed text-muted-foreground [&>section]:py-6 first:[&>section]:pt-0 last:[&>section]:pb-0">
           <section>
             <h2 className="mb-2 text-base font-semibold text-foreground">
               What we collect
