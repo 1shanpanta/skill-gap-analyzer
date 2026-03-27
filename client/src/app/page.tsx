@@ -73,25 +73,33 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="container mx-auto px-4 py-20 lg:py-28">
-        <div className="mx-auto max-w-2xl space-y-6">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            How well does your resume match this job?
-          </h1>
+      <section className="relative overflow-hidden">
+        {/* Subtle gradient backdrop */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/[0.03] via-transparent to-transparent" />
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 -z-10 h-[400px] w-[600px] rounded-full bg-primary/[0.04] blur-[100px]" />
 
-          <p className="text-lg text-muted-foreground">
-            Paste your resume and a job description. Get an instant
-            skill-by-skill breakdown, a match score, and a plan for
-            what to learn next.
-          </p>
+        <div className="container mx-auto px-4 py-20 lg:py-28">
+          <div className="mx-auto max-w-2xl space-y-6">
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+              How well does your resume{" "}
+              <span className="text-primary">match</span> this job?
+            </h1>
 
-          <div>
-            <Link href={ctaHref}>
-              <Button size="lg" className="gap-2">
-                {ctaLabel}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Paste your resume and a job description. Get an instant
+              skill-by-skill breakdown, a match score, and a plan for
+              what to learn next.
+            </p>
+
+            <div className="flex items-center gap-3">
+              <Link href={ctaHref}>
+                <Button size="lg" className="gap-2 shadow-md shadow-primary/20">
+                  {ctaLabel}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <span className="text-xs text-muted-foreground">Free to start, no card needed</span>
+            </div>
           </div>
         </div>
       </section>
