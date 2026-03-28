@@ -250,12 +250,20 @@ router.get('/google/callback', async (req, res) => {
     let user = await findByGoogleId(googleUser.googleId);
 
     if (!user) {
-      // 2. Check by email (auto-link existing account)
-      user = await findByEmail(googleUser.email);
+      // 2. Check by email -- do NOT auto-link to prevent account takeover
+      // If an account exists with this email but no google_id, the user must
+      // log in with their password first, then link Google from settings.
+      const existingUser = await findByEmail(googleUser.email);
 
-      if (user) {
-        await linkGoogleAccount(user.id, googleUser.googleId, googleUser.avatarUrl);
-        user = await findById(user.id);
+      if (existingUser && !existingUser.google_id) {
+        logger.warn({ email: googleUser.email }, 'Google OAuth: existing account without google_id, refusing auto-link');
+        const redirectUrl = `${config.FRONTEND_URL || 'http://localhost:3001'}/login?error=account_exists`;
+        res.redirect(redirectUrl);
+        return;
+      }
+
+      if (existingUser) {
+        user = existingUser;
       } else {
         // 3. Create new Google user
         user = await createGoogleUser(
