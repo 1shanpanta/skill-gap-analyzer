@@ -49,12 +49,10 @@ export function Navbar() {
         {/* Left: Logo / App Name */}
         <Link
           href="/dashboard"
-          className="mr-6 flex items-center gap-2.5 font-bold tracking-tight"
+          className="mr-6 flex items-center gap-2 font-semibold"
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-            <BarChart3 className="h-3.5 w-3.5 text-primary-foreground" />
-          </div>
-          <span className="hidden sm:inline-block">SkillGap</span>
+          <BarChart3 className="h-5 w-5 text-primary" />
+          <span className="hidden sm:inline-block">Skill Gap Analyzer</span>
         </Link>
 
         {/* Center: Desktop Nav Links */}

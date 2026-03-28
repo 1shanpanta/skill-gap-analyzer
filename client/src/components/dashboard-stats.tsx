@@ -10,12 +10,12 @@ export function DashboardStats() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="border-dashed">
+          <Card key={i}>
             <CardContent className="p-4">
-              <Skeleton className="h-3 w-20" />
-              <Skeleton className="mt-3 h-7 w-14" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="mt-2 h-8 w-16" />
             </CardContent>
           </Card>
         ))}
@@ -27,49 +27,47 @@ export function DashboardStats() {
 
   const cards = [
     {
-      label: "Analyses",
+      label: "Total Analyses",
       value: stats.total,
       icon: BarChart3,
-      accent: "bg-primary/10 text-primary",
+      color: "text-blue-600 dark:text-blue-400",
     },
     {
       label: "Completed",
       value: stats.completed,
       icon: CheckCircle2,
-      accent: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      color: "text-green-600 dark:text-green-400",
     },
     {
       label: "Avg Score",
-      value: stats.average_score !== null ? `${Math.round(stats.average_score)}%` : "\u2014",
+      value: stats.average_score !== null ? `${Math.round(stats.average_score)}%` : "—",
       icon: Target,
-      accent: "bg-accent/10 text-accent",
+      color: "text-purple-600 dark:text-purple-400",
     },
     {
       label: "Success Rate",
       value:
         stats.total > 0
           ? `${Math.round((stats.completed / stats.total) * 100)}%`
-          : "\u2014",
+          : "—",
       icon: TrendingUp,
-      accent: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+      color: "text-orange-600 dark:text-orange-400",
     },
   ];
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <Card key={card.label} className="group transition-colors hover:border-primary/20">
-            <CardContent className="flex items-center gap-3 p-4">
-              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${card.accent}`}>
-                <Icon className="h-4 w-4" />
+          <Card key={card.label}>
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className={card.color}>
+                <Icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                  {card.label}
-                </p>
-                <p className="text-xl font-bold tracking-tight">{card.value}</p>
+                <p className="text-xs text-muted-foreground">{card.label}</p>
+                <p className="text-2xl font-bold">{card.value}</p>
               </div>
             </CardContent>
           </Card>

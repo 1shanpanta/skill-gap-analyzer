@@ -17,7 +17,6 @@ interface BarItem {
   value: number;
   weightKey: string;
   color: string;
-  bg: string;
 }
 
 const BARS: BarItem[] = [
@@ -25,29 +24,25 @@ const BARS: BarItem[] = [
     label: "Skill Match",
     value: 0,
     weightKey: "skill_match",
-    color: "bg-primary",
-    bg: "bg-primary/10",
+    color: "bg-blue-500",
   },
   {
     label: "Seniority Alignment",
     value: 0,
     weightKey: "seniority_alignment",
-    color: "bg-violet-500",
-    bg: "bg-violet-500/10",
+    color: "bg-purple-500",
   },
   {
     label: "GitHub Signal",
     value: 0,
     weightKey: "github_signal",
-    color: "bg-accent",
-    bg: "bg-accent/10",
+    color: "bg-emerald-500",
   },
   {
     label: "Bonus Factors",
     value: 0,
     weightKey: "bonus_factors",
     color: "bg-amber-500",
-    bg: "bg-amber-500/10",
   },
 ];
 
@@ -69,37 +64,34 @@ export function ScoreBreakdownCard({ breakdown }: ScoreBreakdownProps) {
         {items.map((item) => {
           const percentage = Math.max(0, Math.min(100, item.actualValue));
           return (
-            <div key={item.weightKey} className="space-y-2">
+            <div key={item.weightKey} className="space-y-1.5">
               <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-foreground">
+                  {item.label}
+                </span>
                 <div className="flex items-center gap-2">
-                  <span className={`h-2 w-2 rounded-full ${item.color}`} />
-                  <span className="font-medium text-foreground">
-                    {item.label}
+                  <span className="text-muted-foreground text-xs">
+                    weight: {Math.round(item.weight * 100)}%
                   </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                    {Math.round(item.weight * 100)}%w
-                  </span>
-                  <span className="font-bold tabular-nums text-foreground">
+                  <span className="font-semibold tabular-nums text-foreground">
                     {Math.round(percentage)}%
                   </span>
                 </div>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-2.5 w-full rounded-full bg-muted">
                 <div
-                  className={`h-full rounded-full transition-all duration-700 ease-out ${item.color}`}
+                  className={`h-full rounded-full transition-all duration-500 ease-out ${item.color}`}
                   style={{ width: `${percentage}%` }}
                 />
               </div>
             </div>
           );
         })}
-        <div className="mt-2 flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2.5">
+        <div className="mt-4 flex items-center justify-between border-t pt-4">
           <span className="text-sm font-semibold text-foreground">
             Weighted Total
           </span>
-          <span className="text-xl font-extrabold tracking-tight text-primary">
+          <span className="text-lg font-bold text-foreground">
             {Math.round(breakdown.weighted_total)}%
           </span>
         </div>

@@ -14,7 +14,7 @@ const config: Config = {
   	extend: {
   		fontFamily: {
   			sans: [
-  				'var(--font-jakarta)',
+  				'var(--font-inter)',
   				'system-ui',
   				'sans-serif'
   			]
