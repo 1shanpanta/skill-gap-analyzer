@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'crypto';
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { prisma } from '../db/prisma';
 import { Prisma } from '../generated/prisma/client';
@@ -10,6 +11,16 @@ import { findAnalysisByIdAndUser, listAnalysesByUser, deleteAnalysis } from '../
 import { logger } from '../lib/logger';
 
 const router = Router();
+
+// Per-user rate limit: max 20 analyses per hour
+const analysisRateLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  keyGenerator: (req) => (req as AuthRequest).userId || req.ip || 'unknown',
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many analyses. Try again in an hour.', code: 'RATE_LIMITED', statusCode: 429 },
+});
 
 const createAnalysisSchema = z.object({
   resume_text: z.string().min(100, 'Resume must be at least 100 characters').max(50000).optional(),
@@ -26,7 +37,7 @@ const createAnalysisSchema = z.object({
 });
 
 // POST /api/analyses
-router.post('/', authMiddleware, rateLimitMiddleware, async (req: AuthRequest, res, next) => {
+router.post('/', authMiddleware, analysisRateLimit, rateLimitMiddleware, async (req: AuthRequest, res, next) => {
   try {
     const body = createAnalysisSchema.parse(req.body);
     const userId = req.userId!;
