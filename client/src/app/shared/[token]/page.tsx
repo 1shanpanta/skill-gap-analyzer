@@ -44,8 +44,9 @@ async function sharedFetcher(url: string): Promise<SharedAnalysis> {
 
 export default function SharedAnalysisPage() {
   const params = useParams<{ token: string }>();
+  const isValidToken = /^[a-f0-9]{64}$/.test(params.token || "");
   const { data: analysis, error, isLoading } = useSWR(
-    `/api/shared/${params.token}`,
+    isValidToken ? `/api/shared/${params.token}` : null,
     sharedFetcher,
     { revalidateOnFocus: false }
   );

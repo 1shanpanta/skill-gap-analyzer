@@ -93,6 +93,13 @@ export default function PricingPage() {
       }
 
       const { checkout_url } = data;
+      // Validate checkout URL to prevent open redirect
+      try {
+        const parsed = new URL(checkout_url);
+        if (parsed.protocol !== "https:") throw new Error("Invalid checkout URL");
+      } catch {
+        throw new Error("Invalid checkout URL received");
+      }
       window.location.href = checkout_url;
     } catch (err) {
       toast.error(
