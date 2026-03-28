@@ -389,11 +389,21 @@ router.get('/:id/stream', authMiddleware, async (req: AuthRequest, res) => {
     return;
   }
 
+  // Max 10 minutes SSE connection to prevent resource exhaustion
+  const SSE_TIMEOUT_MS = 10 * 60 * 1000;
+
+  const timeout = setTimeout(() => {
+    clearInterval(interval);
+    res.write(`data: ${JSON.stringify({ id: analysisId, status: 'timeout', message: 'Stream timed out' })}\n\n`);
+    res.end();
+  }, SSE_TIMEOUT_MS);
+
   const interval = setInterval(async () => {
     try {
       const current = await findAnalysisByIdAndUser(analysisId, userId);
       if (!current) {
         clearInterval(interval);
+        clearTimeout(timeout);
         res.end();
         return;
       }
@@ -405,16 +415,19 @@ router.get('/:id/stream', authMiddleware, async (req: AuthRequest, res) => {
 
       if (current.status === 'completed' || current.status === 'failed') {
         clearInterval(interval);
+        clearTimeout(timeout);
         res.end();
       }
     } catch {
       clearInterval(interval);
+      clearTimeout(timeout);
       res.end();
     }
   }, 2000);
 
   req.on('close', () => {
     clearInterval(interval);
+    clearTimeout(timeout);
   });
 });
 
