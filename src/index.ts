@@ -109,6 +109,7 @@ app.get('/api/shared/:token', sharedLimiter, async (req, res, next) => {
 
     // Validate token format (64-char hex only)
     if (!/^[a-f0-9]{64}$/.test(token)) {
+      logger.warn({ ip: req.ip }, 'Shared link: invalid token format');
       res.status(400).json({ error: 'Invalid token format', code: 'INVALID_TOKEN', statusCode: 400 });
       return;
     }
@@ -118,9 +119,12 @@ app.get('/api/shared/:token', sharedLimiter, async (req, res, next) => {
     });
 
     if (!analysis || analysis.status !== 'completed') {
+      logger.info({ ip: req.ip, tokenPrefix: token.slice(0, 8) }, 'Shared link: not found');
       res.status(404).json({ error: 'Shared analysis not found', code: 'SHARED_NOT_FOUND', statusCode: 404 });
       return;
     }
+
+    logger.info({ analysisId: analysis.id, ip: req.ip }, 'Shared link accessed');
 
     res.json({
       id: analysis.id,
