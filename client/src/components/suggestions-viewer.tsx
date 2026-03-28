@@ -1,6 +1,7 @@
 "use client";
 
 import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
 import {
   Card,
   CardContent,
@@ -28,7 +29,7 @@ export function SuggestionsViewer({ content, actions }: SuggestionsViewerProps) 
       </CardHeader>
       <CardContent>
         <div className="markdown-content">
-          <ReactMarkdown>{content}</ReactMarkdown>
+          <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{content}</ReactMarkdown>
         </div>
       </CardContent>
     </Card>
