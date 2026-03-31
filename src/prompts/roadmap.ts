@@ -24,22 +24,50 @@ ${data.missingRequired.length > 0 ? data.missingRequired.map((s) => `- ${s}`).jo
 ${data.missingPreferred.length > 0 ? data.missingPreferred.map((s) => `- ${s}`).join('\n') : '- None'}
 
 ## Instructions
-Generate a structured 30-60-90 day learning roadmap to close the skill gaps above.
-For each skill gap:
-1. Recommend ONE specific free or affordable learning resource (course, tutorial, documentation).
-2. Suggest a small project or exercise to demonstrate the skill.
-3. Estimate hours needed to reach a competent level.
+Generate TWO sections:
 
-Format the response as:
+### SECTION 1: Learning Roadmap
+A focused, concise 4-week learning plan to close the most critical skill gaps. Be ruthlessly practical — only include what matters most for getting this specific role. No fluff.
 
-### Week 1-4 (Days 1-30): Foundation
-[Focus on the most critical missing required skills]
+For each week, list:
+- **Focus**: The 1-2 skills to prioritize that week
+- **Resource**: ONE specific free resource (link or name)
+- **Hours**: Estimated hours needed
 
-### Week 5-8 (Days 31-60): Deepening
-[Build on foundations + start preferred skills]
+Format as:
 
-### Week 9-12 (Days 61-90): Portfolio & Practice
-[Build portfolio projects + interview preparation]
+#### Week 1: [Theme]
+- **Focus**: [skill(s)]
+- **Resource**: [specific course/tutorial/docs]
+- **Hours**: ~X hrs
 
-Keep recommendations practical and actionable. Prefer free resources. Total response under 1500 words.`;
+#### Week 2: [Theme]
+...
+
+#### Week 3: [Theme]
+...
+
+#### Week 4: [Theme]
+...
+
+### SECTION 2: Recommended Projects
+Suggest exactly 3 portfolio projects the candidate should build to demonstrate the missing skills to employers. These projects should be:
+- Directly relevant to the **${data.targetRole}** role
+- Designed to showcase the missing required skills in practice
+- Impressive enough for a portfolio but achievable in 1-2 weeks each
+
+For each project, provide:
+- **Project name**: A catchy, descriptive name
+- **What to build**: 2-3 sentence description
+- **Skills demonstrated**: Which missing skills this covers
+- **Complexity**: Beginner / Intermediate / Advanced
+
+Format as:
+
+#### 1. [Project Name]
+**What to build**: [description]
+**Skills demonstrated**: [skill list]
+**Complexity**: [level]
+
+Keep the entire response under 800 words. Be direct and specific — no generic advice.`;
 }

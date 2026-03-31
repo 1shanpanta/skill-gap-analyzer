@@ -470,24 +470,22 @@ function AnalysisContent({ analysis, onUpdate }: { analysis: AnalysisFull; onUpd
       {/* Skill gap chart */}
       {analysis.skill_gaps && <SkillGapChart gaps={analysis.skill_gaps} />}
 
-      {/* Roadmap and Resume Suggestions — two columns on desktop */}
-      {(analysis.roadmap || analysis.resume_suggestions) && (
-        <div className="grid gap-6 lg:grid-cols-2">
-          {analysis.roadmap && (
-            <RoadmapViewer
-              content={analysis.roadmap}
-              actions={<CopyButton text={analysis.roadmap} label="Copy" />}
-            />
-          )}
-          {analysis.resume_suggestions && (
-            <SuggestionsViewer
-              content={analysis.resume_suggestions}
-              actions={
-                <CopyButton text={analysis.resume_suggestions} label="Copy" />
-              }
-            />
-          )}
-        </div>
+      {/* Roadmap + Recommended Projects */}
+      {analysis.roadmap && (
+        <RoadmapViewer
+          content={analysis.roadmap}
+          actions={<CopyButton text={analysis.roadmap} label="Copy" />}
+        />
+      )}
+
+      {/* Resume Suggestions */}
+      {analysis.resume_suggestions && (
+        <SuggestionsViewer
+          content={analysis.resume_suggestions}
+          actions={
+            <CopyButton text={analysis.resume_suggestions} label="Copy" />
+          }
+        />
       )}
 
       {/* GitHub signals */}

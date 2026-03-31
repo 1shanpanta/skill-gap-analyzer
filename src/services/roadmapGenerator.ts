@@ -18,7 +18,7 @@ export async function generateRoadmap(data: RoadmapPromptData): Promise<{
   const response = await groq.chat.completions.create({
     model: config.GROQ_MODEL,
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 2000,
+    max_tokens: 1500,
     temperature: 0.7,
   }, { signal: controller.signal });
 
