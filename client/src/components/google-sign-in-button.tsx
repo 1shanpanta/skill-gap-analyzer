@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button";
 
 export function GoogleSignInButton({
   label = "Continue with Google",
+  fullWidth = true,
 }: {
   label?: string;
+  fullWidth?: boolean;
 }) {
   return (
     <Button
       variant="outline"
-      className="w-full gap-2"
+      className={`gap-2 ${fullWidth ? "w-full" : ""}`}
       onClick={() => {
         window.location.href = "/api/auth/google";
       }}
