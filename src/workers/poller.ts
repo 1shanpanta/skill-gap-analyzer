@@ -27,14 +27,29 @@ export function startWorker(): void {
         const permanentlyFailed = await failJob(job.id, err.message);
 
         if (permanentlyFailed) {
-          // Refund the credit since analysis permanently failed
+          // Refund credit atomically: check job is failed + not yet refunded in one transaction
           const payload = job.payload as Record<string, any>;
           if (payload.user_id) {
-            await prisma.user.update({
-              where: { id: payload.user_id },
-              data: { credits: { increment: 1 } },
+            const refunded = await prisma.$transaction(async (tx) => {
+              const failedJob = await tx.job.findUnique({
+                where: { id: job.id },
+                select: { status: true, error: true },
+              });
+              if (failedJob?.status !== 'failed' || failedJob.error?.includes('[refunded]')) return false;
+
+              await tx.user.update({
+                where: { id: payload.user_id },
+                data: { credits: { increment: 1 } },
+              });
+              await tx.job.update({
+                where: { id: job.id },
+                data: { error: `${failedJob.error} [refunded]` },
+              });
+              return true;
             });
-            logger.info({ workerId: WORKER_ID, jobId: job.id, userId: payload.user_id }, 'Refunded 1 credit for permanently failed analysis');
+            if (refunded) {
+              logger.info({ workerId: WORKER_ID, jobId: job.id, userId: payload.user_id }, 'Refunded 1 credit for permanently failed analysis');
+            }
           }
         }
       }

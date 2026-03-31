@@ -16,7 +16,7 @@ export function authMiddleware(req: AuthRequest, _res: Response, next: NextFunct
   const token = cookieToken || bearerToken;
 
   if (!token) {
-    logger.warn({ ip: req.ip, path: req.path }, 'Auth attempt without token');
+    logger.debug({ ip: req.ip, path: req.path }, 'Auth check without token');
     next(new AppError(401, 'Authentication required', 'AUTH_REQUIRED'));
     return;
   }

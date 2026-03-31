@@ -25,8 +25,8 @@ router.post('/dodo', raw({ type: 'application/json' }), async (req, res) => {
   // Replay protection: reject webhooks older than 5 minutes
   const timestampStr = headers['webhook-timestamp'];
   if (timestampStr) {
-    const webhookAge = Math.abs(Date.now() / 1000 - Number(timestampStr));
-    if (webhookAge > 300) {
+    const webhookAge = Date.now() / 1000 - Number(timestampStr);
+    if (webhookAge > 300 || webhookAge < -60) {
       logger.warn({ age: webhookAge, id: headers['webhook-id'] }, 'Webhook rejected: too old (replay protection)');
       res.status(401).json({ error: 'Webhook timestamp too old' });
       return;
