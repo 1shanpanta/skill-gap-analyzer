@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useAnalysisStats } from "@/hooks/useAnalysisData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,18 +32,21 @@ export function DashboardStats() {
       value: stats.total,
       icon: BarChart3,
       color: "text-blue-600 dark:text-blue-400",
+      href: "/history",
     },
     {
       label: "Completed",
       value: stats.completed,
       icon: CheckCircle2,
       color: "text-green-600 dark:text-green-400",
+      href: "/history?status=completed",
     },
     {
       label: "Avg Score",
       value: stats.average_score !== null ? `${Math.round(stats.average_score)}%` : "—",
       icon: Target,
       color: "text-purple-600 dark:text-purple-400",
+      href: "/history",
     },
     {
       label: "Success Rate",
@@ -52,6 +56,7 @@ export function DashboardStats() {
           : "—",
       icon: TrendingUp,
       color: "text-orange-600 dark:text-orange-400",
+      href: "/history",
     },
   ];
 
@@ -60,17 +65,19 @@ export function DashboardStats() {
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <Card key={card.label}>
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className={card.color}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{card.label}</p>
-                <p className="text-2xl font-bold">{card.value}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <Link key={card.label} href={card.href}>
+            <Card className="transition-colors hover:bg-muted/50 cursor-pointer">
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className={card.color}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">{card.label}</p>
+                  <p className="text-2xl font-bold">{card.value}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         );
       })}
     </div>
