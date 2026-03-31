@@ -10,7 +10,7 @@ export function getDodoClient(): DodoPayments {
     }
     client = new DodoPayments({
       bearerToken: config.DODO_API_KEY,
-      environment: config.NODE_ENV === 'production' ? 'live_mode' : 'test_mode',
+      environment: config.DODO_ENVIRONMENT,
     });
   }
   return client;

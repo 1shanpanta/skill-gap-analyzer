@@ -31,6 +31,7 @@ const envSchema = z.object({
   // DodoPayments
   DODO_API_KEY: z.string().optional().default(''),
   DODO_WEBHOOK_SECRET: z.string().optional().default(''),
+  DODO_ENVIRONMENT: z.enum(['test_mode', 'live_mode']).default('test_mode'),
   DODO_PRODUCT_10: z.string().optional().default(''),
   DODO_PRODUCT_30: z.string().optional().default(''),
   DODO_PRODUCT_100: z.string().optional().default(''),
