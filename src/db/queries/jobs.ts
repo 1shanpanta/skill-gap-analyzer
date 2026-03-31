@@ -36,8 +36,9 @@ export async function completeJob(jobId: string, result: Record<string, any>): P
 }
 
 // Uses raw SQL for the complex CASE expression with exponential backoff
-export async function failJob(jobId: string, error: string): Promise<void> {
-  await prisma.$queryRaw`
+// Returns true if the job permanently failed (all retries exhausted)
+export async function failJob(jobId: string, error: string): Promise<boolean> {
+  const rows = await prisma.$queryRaw<{ status: string }[]>`
     UPDATE jobs
     SET status = CASE
           WHEN attempts >= max_attempts THEN 'failed'
@@ -55,7 +56,9 @@ export async function failJob(jobId: string, error: string): Promise<void> {
         END,
         worker_id = NULL,
         started_at = NULL
-    WHERE id = ${jobId}::uuid`;
+    WHERE id = ${jobId}::uuid
+    RETURNING status`;
+  return rows[0]?.status === 'failed';
 }
 
 // Uses raw SQL for interval arithmetic

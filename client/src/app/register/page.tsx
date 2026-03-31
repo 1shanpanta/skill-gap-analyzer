@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 
 export default function RegisterPage() {
-  const { register, login, user, isLoading: authLoading } = useAuth();
+  const { register, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -30,15 +30,12 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Auto-login with dev bypass for now (skip auth)
+  // Redirect to dashboard if already logged in
   useEffect(() => {
-    if (!authLoading && !user) {
-      login("", "");
-    }
     if (!authLoading && user) {
       router.replace("/dashboard");
     }
-  }, [authLoading, user, router, login]);
+  }, [authLoading, user, router]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
