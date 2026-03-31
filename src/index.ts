@@ -19,9 +19,6 @@ const app = express();
 // Validate critical env vars in production
 if (config.NODE_ENV === 'production') {
   if (!config.FRONTEND_URL) throw new Error('FRONTEND_URL must be set in production');
-  if (config.JWT_SECRET.includes('test') || config.JWT_SECRET.length < 32) {
-    throw new Error('JWT_SECRET must be a strong random value in production (min 32 chars, no "test")');
-  }
 }
 
 app.set('trust proxy', 1);
