@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(data.user);
       posthog.identify(data.user.id, { email: data.user.email, name: data.user.name });
       posthog.capture("user_logged_in");
-      router.push("/dashboard");
+      router.push("/");
     },
     [router]
   );
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(data.user);
       posthog.identify(data.user.id, { email: data.user.email, name: data.user.name });
       posthog.capture("user_signed_up");
-      router.push("/dashboard");
+      router.push("/");
     },
     [router]
   );
@@ -124,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(u);
           posthog.identify(u.id, { email: u.email, name: u.name });
           posthog.capture("user_logged_in", { method: "google" });
-          router.push("/dashboard");
+          router.push("/");
         }
       } catch {
         // Will be handled by the callback page

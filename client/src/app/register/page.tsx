@@ -30,10 +30,10 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirect to dashboard if already logged in
+  // Redirect to home if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      router.replace("/dashboard");
+      router.replace("/");
     }
   }, [authLoading, user, router]);
 

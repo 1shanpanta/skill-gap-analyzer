@@ -41,7 +41,7 @@ function LoginContent() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (!authLoading && user) {
-      router.replace("/dashboard");
+      router.replace("/");
     }
   }, [authLoading, user, router]);
 
