@@ -122,13 +122,34 @@ prisma/                  Schema + migrations
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `DATABASE_URL` | Yes | PostgreSQL connection |
+| `DATABASE_URL` | Yes | PostgreSQL connection (Supabase pooler) |
 | `JWT_SECRET` | Yes | JWT signing (min 32 chars) |
 | `GROQ_API_KEY` | Yes | LLM for roadmap + suggestions |
 | `FRONTEND_URL` | Prod | CORS origin + redirect URLs |
 | `DODO_API_KEY` | For payments | DodoPayments API |
 | `DODO_WEBHOOK_SECRET` | For payments | Webhook signature verification |
 | `DODO_PRODUCT_*` | For payments | Product IDs for credit packs |
+| `DODO_ENVIRONMENT` | No | `test_mode` (default) or `live_mode` |
 | `GOOGLE_CLIENT_ID/SECRET` | For OAuth | Google sign-in |
 | `RESEND_API_KEY` | For email | Password reset emails |
 | `GITHUB_TOKEN` | Optional | Higher GitHub API rate limits |
+
+## Deployment Details
+
+- **Supabase project**: `dsgugztttjrfpnupnvfx` (ap-northeast-2, IPv6-only direct)
+- **Supabase pooler**: `aws-1-ap-northeast-2.pooler.supabase.com:6543` (IPv4, required for local access)
+- **Render service ID**: `srv-d6e1q0f5r7bs73bbre4g` (free tier, spins down on inactivity)
+- **Vercel**: auto-deploys from `main` branch (client only)
+- **Render**: requires manual deploy trigger (does NOT auto-deploy from GitHub)
+
+## Recent Security Hardening (March 2026)
+
+- rehype-sanitize on all markdown renderers (XSS prevention)
+- Shared link token validation (hex-only regex, client + server)
+- GitHub URL validation (profile URLs only)
+- Checkout URL validation (https-only, prevents open redirect)
+- Per-user analysis rate limit (20/hour)
+- Webhook replay protection (5min window, rejects future timestamps)
+- Security headers (X-Frame-Options, HSTS, nosniff, referrer-policy)
+- Auth failure logging (warn for invalid tokens, debug for unauthenticated)
+- Credit refund on permanent job failure (transactional, idempotent via `[refunded]` marker)
