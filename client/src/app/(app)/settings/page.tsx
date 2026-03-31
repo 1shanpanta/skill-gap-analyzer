@@ -99,7 +99,7 @@ export default function SettingsPage() {
           <CardDescription>The basics</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid gap-4 text-sm sm:grid-cols-2">
             <div>
               <span className="text-muted-foreground">Email</span>
               <p className="font-medium">{profile.email}</p>

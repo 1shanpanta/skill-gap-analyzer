@@ -172,6 +172,14 @@ export function Navbar() {
                 </Link>
               );
             })}
+            <Link
+              href="/pricing"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <Coins className="h-4 w-4" />
+              {user?.credits ?? 0} {user?.credits === 1 ? "credit" : "credits"}
+            </Link>
             <div className="my-1 border-t" />
             <div className="flex items-center justify-between px-3 py-2">
               <Link

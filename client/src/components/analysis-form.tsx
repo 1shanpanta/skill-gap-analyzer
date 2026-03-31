@@ -425,21 +425,24 @@ export function AnalysisForm() {
                   value={resumeText}
                   onChange={(e) => setResumeText(e.target.value)}
                   disabled={isDisabled}
-                  rows={8}
+                  rows={6}
                   className="resize-y"
                 />
 
                 {/* Save resume option */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 rounded-md border border-dashed p-2.5">
                   <Checkbox
                     id="save-resume"
                     checked={saveResume}
                     onCheckedChange={(checked) => setSaveResume(checked === true)}
                     disabled={isDisabled}
                   />
-                  <label htmlFor="save-resume" className="text-sm text-muted-foreground cursor-pointer">
-                    <Save className="mr-1 inline h-3.5 w-3.5" />
-                    Save this resume for future analyses
+                  <label htmlFor="save-resume" className="text-sm font-medium cursor-pointer">
+                    <Save className="mr-1.5 inline h-3.5 w-3.5 text-muted-foreground" />
+                    Save for reuse
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">
+                      -- skip pasting next time
+                    </span>
                   </label>
                 </div>
 
@@ -470,7 +473,7 @@ export function AnalysisForm() {
               value={jdText}
               onChange={(e) => setJdText(e.target.value)}
               disabled={isDisabled}
-              rows={8}
+              rows={6}
               className="resize-y"
             />
           </div>
