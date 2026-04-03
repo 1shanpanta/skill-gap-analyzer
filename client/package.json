@@ -19,11 +19,11 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.575.0",
-    "mammoth": "^1.11.0",
-    "next": "16.1.6",
+    "mammoth": "^1.12.0",
+    "next": "^16.2.2",
     "next-themes": "^0.4.6",
     "pdfjs-dist": "^5.5.207",
-    "posthog-js": "^1.357.1",
+    "posthog-js": "^1.364.7",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
@@ -38,8 +38,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.24",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint": "^10.1.0",
+    "eslint-config-next": "^16.2.2",
     "postcss": "^8.5.6",
     "tailwindcss": "3.4.17",
     "tailwindcss-animate": "^1.0.7",
@@ -52,5 +52,12 @@
   "trustedDependencies": [
     "sharp",
     "unrs-resolver"
-  ]
+  ],
+  "overrides": {
+    "minimatch": "^9.0.6",
+    "brace-expansion": "^2.0.3",
+    "flatted": "^3.4.0",
+    "picomatch": "^4.0.4",
+    "@xmldom/xmldom": "^0.9.8"
+  }
 }

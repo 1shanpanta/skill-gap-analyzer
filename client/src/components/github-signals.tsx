@@ -78,7 +78,7 @@ export function GitHubSignals({ signals, githubUrl }: GitHubSignalsProps) {
             <Github className="h-5 w-5 text-muted-foreground" />
             GitHub Analysis
           </CardTitle>
-          {githubUrl && /^https:\/\/(www\.)?github\.com\/[a-zA-Z0-9-]+\/?$/.test(githubUrl) && (
+          {githubUrl && /^https:\/\/(www\.)?github\.com\/[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?\/?$/.test(githubUrl) && (
             <a
               href={githubUrl}
               target="_blank"

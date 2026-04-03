@@ -2,8 +2,17 @@ import { config } from '../config/index';
 import type { GitHubSignals } from './scorer';
 
 function extractUsername(url: string): string {
-  const match = url.match(/github\.com\/([a-zA-Z0-9\-]+)/);
-  if (!match) throw new Error(`Invalid GitHub URL: ${url}`);
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error('Invalid GitHub URL');
+  }
+  if (parsed.hostname !== 'github.com' && parsed.hostname !== 'www.github.com') {
+    throw new Error('Invalid GitHub URL: must be github.com');
+  }
+  const match = parsed.pathname.match(/^\/([a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?)\/?$/);
+  if (!match) throw new Error('Invalid GitHub username in URL');
   return match[1];
 }
 

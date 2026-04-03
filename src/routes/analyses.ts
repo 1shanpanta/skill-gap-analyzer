@@ -237,12 +237,17 @@ router.get('/export', authMiddleware, async (req: AuthRequest, res, next) => {
       ].join('; ');
       const github = a.github_url ?? '';
 
-      // Escape fields that might contain commas/quotes
+      // Escape fields: prevent CSV injection (formula prefixes) and handle commas/quotes
       const escape = (s: string) => {
-        if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-          return `"${s.replace(/"/g, '""')}"`;
+        let val = s;
+        // Neutralize formula injection: prefix with single quote if cell starts with =, +, -, @, tab, or CR
+        if (/^[=+\-@\t\r]/.test(val)) {
+          val = `'${val}`;
         }
-        return s;
+        if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+          return `"${val.replace(/"/g, '""')}"`;
+        }
+        return val;
       };
 
       return [date, a.status, score, escape(matched), escape(missing), github].join(',');
@@ -304,8 +309,14 @@ router.get('/', authMiddleware, async (req: AuthRequest, res, next) => {
     if (req.query.status && ['pending', 'processing', 'completed', 'failed'].includes(req.query.status as string)) {
       filters.status = req.query.status as string;
     }
-    if (req.query.min_score) filters.minScore = parseFloat(req.query.min_score as string);
-    if (req.query.max_score) filters.maxScore = parseFloat(req.query.max_score as string);
+    if (req.query.min_score) {
+      const v = parseFloat(req.query.min_score as string);
+      if (Number.isFinite(v) && v >= 0 && v <= 100) filters.minScore = v;
+    }
+    if (req.query.max_score) {
+      const v = parseFloat(req.query.max_score as string);
+      if (Number.isFinite(v) && v >= 0 && v <= 100) filters.maxScore = v;
+    }
     if (req.query.sort && ['newest', 'oldest', 'score_asc', 'score_desc'].includes(req.query.sort as string)) {
       filters.sort = req.query.sort as 'newest' | 'oldest' | 'score_asc' | 'score_desc';
     }

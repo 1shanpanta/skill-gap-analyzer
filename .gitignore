@@ -4,6 +4,7 @@ dist/
 !.env.example
 /dist/**/*.js
 .DS_Store
+.next/
 client/.next/
 client/node_modules/
 .claude/
@@ -11,3 +12,4 @@ todo.md
 
 /src/generated/prisma
 .vercel
+.gstack/
