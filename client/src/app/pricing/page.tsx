@@ -114,8 +114,8 @@ export default function PricingPage() {
     <div className="min-h-screen">
       {/* Nav */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-14 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
+        <nav className="container mx-auto flex h-14 items-center justify-between px-4">
+          <Link href="/" className="flex items-center gap-2 font-semibold min-h-[48px]">
             <BarChart3 className="h-5 w-5 text-primary" />
             Skill Gap Analyzer
           </Link>
@@ -147,9 +147,10 @@ export default function PricingPage() {
                 </>
               ))}
           </div>
-        </div>
+        </nav>
       </header>
 
+      <main>
       {/* Hero */}
       <section className="container mx-auto px-4 py-16 lg:py-20">
         <div className="mx-auto max-w-2xl text-center">
@@ -257,6 +258,7 @@ export default function PricingPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="border-t py-8">

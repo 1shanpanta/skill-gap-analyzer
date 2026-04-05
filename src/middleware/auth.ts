@@ -8,6 +8,24 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
+export function optionalAuthMiddleware(req: AuthRequest, _res: Response, next: NextFunction): void {
+  const cookieToken = req.cookies?.auth_token;
+  const header = req.headers.authorization;
+  const bearerToken = header?.startsWith('Bearer ') ? header.slice(7) : null;
+  const token = cookieToken || bearerToken;
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, config.JWT_SECRET) as { userId: string };
+      req.userId = decoded.userId;
+    } catch {
+      // Invalid token — proceed without auth
+    }
+  }
+
+  next();
+}
+
 export function authMiddleware(req: AuthRequest, _res: Response, next: NextFunction): void {
   const cookieToken = req.cookies?.auth_token;
   const header = req.headers.authorization;

@@ -35,16 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch("/api/auth/me", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
-          const u = {
-            id: data.id,
-            email: data.email,
-            name: data.name,
-            avatar_url: data.avatar_url,
-            credits: data.credits ?? 0,
-            created_at: data.created_at,
-          };
-          setUser(u);
-          posthog.identify(u.id, { email: u.email, name: u.name });
+          if (data) {
+            const u = {
+              id: data.id,
+              email: data.email,
+              name: data.name,
+              avatar_url: data.avatar_url,
+              credits: data.credits ?? 0,
+              created_at: data.created_at,
+            };
+            setUser(u);
+            posthog.identify(u.id, { email: u.email, name: u.name });
+          }
         }
       } catch {
         // Not authenticated — that's fine

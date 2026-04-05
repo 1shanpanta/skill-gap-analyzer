@@ -21,7 +21,7 @@ import {
   getUserWithStats,
 } from '../db/queries/users';
 import { AppError } from '../middleware/errorHandler';
-import { authMiddleware, type AuthRequest } from '../middleware/auth';
+import { authMiddleware, optionalAuthMiddleware, type AuthRequest } from '../middleware/auth';
 import { sendPasswordResetEmail } from '../services/email';
 import { getGoogleAuthUrl, getGoogleUser } from '../services/google-auth';
 import { logger } from '../lib/logger';
@@ -294,10 +294,15 @@ router.post('/logout', (_req, res) => {
   res.json({ message: 'Logged out' });
 });
 
-// GET /api/auth/me — get current user profile
-router.get('/me', authMiddleware, async (req: AuthRequest, res, next) => {
+// GET /api/auth/me — get current user profile (returns null if not authenticated)
+router.get('/me', optionalAuthMiddleware, async (req: AuthRequest, res, next) => {
+  if (!req.userId) {
+    res.json(null);
+    return;
+  }
+
   try {
-    const user = await getUserWithStats(req.userId!);
+    const user = await getUserWithStats(req.userId);
     if (!user) throw new AppError(404, 'User not found');
 
     res.json({
