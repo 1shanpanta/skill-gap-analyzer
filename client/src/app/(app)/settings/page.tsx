@@ -57,7 +57,7 @@ export default function SettingsPage() {
         </div>
         <div className="rounded-lg border p-6 space-y-4">
           <Skeleton className="h-5 w-16" />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />

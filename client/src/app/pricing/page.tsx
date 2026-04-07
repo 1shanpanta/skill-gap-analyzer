@@ -114,12 +114,13 @@ export default function PricingPage() {
     <div className="min-h-screen">
       {/* Nav */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <nav className="container mx-auto flex h-14 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold min-h-[48px]">
+        <nav className="container mx-auto flex h-14 items-center justify-between gap-2 px-4">
+          <Link href="/" className="flex items-center gap-2 font-semibold min-h-[48px] shrink-0">
             <BarChart3 className="h-5 w-5 text-primary" />
-            Skill Gap Analyzer
+            <span className="hidden sm:inline">Skill Gap Analyzer</span>
+            <span className="sm:hidden">SGA</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
@@ -185,7 +186,7 @@ export default function PricingPage() {
 
       {/* Credit packs */}
       <section className="container mx-auto px-4 pb-16">
-        <div className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-3">
+        <div className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {packs.map((pack) => (
             <Card
               key={pack.key}
@@ -262,7 +263,7 @@ export default function PricingPage() {
 
       {/* Footer */}
       <footer className="border-t py-8">
-        <div className="container mx-auto flex items-center justify-between px-4 text-sm text-muted-foreground">
+        <div className="container mx-auto flex flex-col items-center gap-4 px-4 text-sm text-muted-foreground sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Skill Gap Analyzer

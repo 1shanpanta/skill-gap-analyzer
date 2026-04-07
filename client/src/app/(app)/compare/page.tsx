@@ -86,7 +86,7 @@ export default function ComparePage() {
             { label: "Compare" },
           ]}
         />
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           {[0, 1].map((i) => (
             <Card key={i}>
               <CardContent className="p-6 space-y-4">
@@ -114,11 +114,11 @@ export default function ComparePage() {
         ]}
       />
 
-      <h1 className="text-2xl font-bold tracking-tight">
+      <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
         Side-by-Side Comparison
       </h1>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         {[a, b].map((analysis, i) => {
           if (!analysis) {
             return (
@@ -232,7 +232,7 @@ export default function ComparePage() {
       {/* Score delta */}
       {a?.overall_score && b?.overall_score && (
         <Card>
-          <CardContent className="flex items-center justify-center gap-4 p-6">
+          <CardContent className="flex flex-col items-center justify-center gap-2 p-6 sm:flex-row sm:gap-4">
             <span className="text-sm text-muted-foreground">
               Score difference:
             </span>

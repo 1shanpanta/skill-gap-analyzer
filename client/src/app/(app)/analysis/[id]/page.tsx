@@ -112,7 +112,7 @@ export default function AnalysisPage() {
           </div>
           <div className="rounded-lg border p-6 space-y-4">
             <Skeleton className="h-6 w-36" />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="space-y-2">
                   <Skeleton className="h-4 w-24" />
@@ -430,9 +430,9 @@ function AnalysisContent({ analysis, onUpdate }: { analysis: AnalysisFull; onUpd
   return (
     <div className="space-y-8">
       {/* Page title */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             Analysis Results
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
