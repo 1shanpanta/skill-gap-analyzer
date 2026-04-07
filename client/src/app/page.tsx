@@ -32,12 +32,13 @@ export default function LandingPage() {
     <div className="min-h-screen">
       {/* Nav */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <nav className="container mx-auto flex h-14 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold min-h-[48px]">
+        <nav className="container mx-auto flex h-14 items-center justify-between gap-2 px-4">
+          <Link href="/" className="flex items-center gap-2 font-semibold min-h-[48px] shrink-0">
             <BarChart3 className="h-5 w-5 text-primary" />
-            Skill Gap Analyzer
+            <span className="hidden sm:inline">Skill Gap Analyzer</span>
+            <span className="sm:hidden">SGA</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             <Link href="/pricing">
               <Button variant="ghost" size="sm">
                 Pricing
@@ -74,7 +75,7 @@ export default function LandingPage() {
 
       <main>
       {/* Hero */}
-      <section className="container mx-auto px-4 py-20 lg:py-28">
+      <section className="container mx-auto px-4 py-12 sm:py-20 lg:py-28">
         <div className="mx-auto max-w-2xl space-y-6">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
             How well does your resume match this job?
@@ -344,12 +345,12 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t py-8">
-        <div className="container mx-auto flex items-center justify-between px-4 text-sm text-muted-foreground">
+        <div className="container mx-auto flex flex-col items-center gap-4 px-4 text-sm text-muted-foreground sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Skill Gap Analyzer
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <Link href="/pricing" className="hover:underline">
               Pricing
             </Link>

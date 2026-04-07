@@ -33,14 +33,23 @@ export function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Close mobile menu on Escape key
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Close mobile menu on Escape key + prevent body scroll when open
   useEffect(() => {
     if (!mobileMenuOpen) return;
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") setMobileMenuOpen(false);
     }
+    document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [mobileMenuOpen]);
 
   return (
@@ -149,8 +158,14 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="border-t md:hidden">
-          <nav className="container mx-auto flex flex-col gap-1 px-4 py-3">
+        <>
+        <div
+          className="fixed inset-0 top-14 z-40 bg-background/80 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+        <div className="relative z-50 border-t md:hidden">
+          <nav className="container mx-auto flex flex-col gap-1 bg-background px-4 py-3">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
@@ -220,6 +235,7 @@ export function Navbar() {
             </div>
           </nav>
         </div>
+        </>
       )}
     </header>
   );

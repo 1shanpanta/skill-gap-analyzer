@@ -271,15 +271,17 @@ export function AnalysisForm() {
                 </>
               )}
               {status.status === "completed" && (
-                <>
-                  <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <div>
-                    <p className="font-medium">Done!</p>
-                    <p className="text-sm text-muted-foreground">
-                      Score: {Number(status.overall_score).toFixed(1)}/100
-                    </p>
+                <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
+                    <div>
+                      <p className="font-medium">Done!</p>
+                      <p className="text-sm text-muted-foreground">
+                        Score: {Number(status.overall_score).toFixed(1)}/100
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-auto flex gap-2">
+                  <div className="flex gap-2 sm:ml-auto">
                     <Button variant="outline" size="sm" onClick={resetForm}>
                       New Analysis
                     </Button>
@@ -289,7 +291,7 @@ export function AnalysisForm() {
                       </Link>
                     </Button>
                   </div>
-                </>
+                </div>
               )}
               {status.status === "failed" && (
                 <>

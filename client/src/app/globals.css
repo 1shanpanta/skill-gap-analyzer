@@ -55,6 +55,25 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-text-size-adjust: 100%;
+  }
+  /* Prevent horizontal overflow on mobile */
+  html {
+    overflow-x: hidden;
+  }
+  /* Ensure tap targets are comfortable on mobile */
+  @media (pointer: coarse) {
+    button,
+    a,
+    [role="button"],
+    input,
+    select,
+    textarea {
+      min-height: 44px;
+    }
+    input[type="checkbox"] {
+      min-height: auto;
+    }
   }
 }
 
@@ -131,5 +150,10 @@
   }
   .markdown-content td {
     @apply border border-border px-3 py-2;
+  }
+  /* Responsive table wrapper for markdown content on mobile */
+  .markdown-content .table-wrapper,
+  .markdown-content table {
+    @apply block overflow-x-auto;
   }
 }
